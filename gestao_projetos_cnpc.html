@@ -523,7 +523,7 @@ input,select,textarea{font-family:'DM Sans',sans-serif;}
 .page-subtitle{font-size:13px;color:var(--ink3);margin-top:4px;}
 .page-header-right{display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;flex-shrink:0;}
 .portfolio-header-actions{margin-left:auto;max-width:760px;}
-.client-logo-header{width:86px;height:34px;object-fit:contain;display:block;flex:0 0 auto;}
+.client-logo-header{width:86px;height:34px;object-fit:contain;display:block;flex:0 0 auto;background:transparent;mix-blend-mode:multiply;}
 .project-objective-card textarea{min-height:72px;resize:vertical;}
 .print-footer-logos{display:none;}
 .portfolio-milestone-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;}
@@ -1662,13 +1662,13 @@ function projectTitle(p){
 }
 
 function projectShortTitle(p){
-  return String(projectTitle(p)).split(':')[0].trim();
+  const pid=String(p?.Projeto||'').trim();
+  return pid||String(projectTitle(p)).split(':')[0].trim();
 }
 
 function projectOptionLabel(p){
-  const pid=String(p?.Projeto||'');
-  const title=projectShortTitle(p);
-  return title ? `${pid}${SEP}${title}` : pid;
+  const pid=String(p?.Projeto||'').trim();
+  return pid||projectShortTitle(p);
 }
 
 function projectOptionHtml(p){
