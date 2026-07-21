@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -2625,9 +2625,13 @@ async function fazerLogin(){
     try{
       if(!popup||popup.closed){clearInterval(poll);return;}
       const url=popup.location.href;
-      if(!captured&&url.includes('gestao_projetos.html')&&url.includes('code=')){
+      const current=new URL(url);
+      const redirect=new URL(REDIRECT_URI);
+      const sameRedirect=current.origin===redirect.origin&&current.pathname===redirect.pathname;
+      const code=current.searchParams.get('code');
+      if(!captured&&sameRedirect&&code){
         captured=true;clearInterval(poll);popup.close();
-        await trocarCodePorToken(new URLSearchParams(url.split('?')[1]).get('code'));
+        await trocarCodePorToken(code);
       }
     }catch(e){}
   },200);
