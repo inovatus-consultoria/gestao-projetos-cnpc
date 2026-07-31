@@ -876,7 +876,7 @@ tr:hover td{background:var(--surface3);}
       Entrar com Microsoft
     </button>
   </div>
-  <div class="login-version">Inovatus RD&amp;I - vB-XL - 28/05/2026</div>
+  <div class="login-version">Versão da ferramenta atualizada em 31/07/2026</div>
 </div>
 
 <!-- ===================== LOADING OVERLAY ===================== -->
@@ -943,7 +943,7 @@ tr:hover td{background:var(--surface3);}
         </div>
       </div>
       <button class="btn-logout" onclick="fazerLogout()">Logout (Excel)</button>
-      <div class="sidebar-version">Atualizado pela última vez em 20/07/2026</div>
+      <div class="sidebar-version">Versão da ferramenta atualizada em 31/07/2026</div>
     </div>
   </aside>
 
@@ -1331,54 +1331,38 @@ tr:hover td{background:var(--surface3);}
 
 <!-- ===================== MODAL: ADD SM ===================== -->
 <div class="modal-overlay" id="sm-modal">
-  <div class="modal" style="max-width:680px;">
-    <h2 class="modal-title" id="modal-sm-title">New Change Request (SM)</h2>
+  <div class="modal" style="max-width:1120px;width:min(96vw,1120px);">
+    <h2 class="modal-title" id="modal-sm-title">Nova Solicitação de Mudança (SM)</h2>
     <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Project</label>
-        <select class="form-select" id="sm-project" onchange="onSMProjectChange()"></select>
-      </div>
-      <div class="form-group">
-        <label class="form-label">SM #</label>
-        <input class="form-input" id="sm-number" placeholder="SM1, SM2...">
-      </div>
+      <div class="form-group"><label class="form-label">Projeto</label><select class="form-select" id="sm-project" onchange="smProjectChanged()"></select></div>
+      <div class="form-group"><label class="form-label">Nº da SM</label><input class="form-input" id="sm-number" placeholder="SM1, SM2..."></div>
     </div>
     <div class="form-grid">
-      <div class="form-group">
-        <label class="form-label">Submission Date</label>
-        <input class="form-input" type="date" id="sm-date-submissao">
-      </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select class="form-select" id="sm-status">
-          <option value="Pendente">Pendente</option>
-          <option value="Em anÃ¡lise">Em anÃ¡lise</option>
-          <option value="Aprovada">Aprovada</option>
-          <option value="Rejeitada">Rejeitada</option>
-        </select>
-      </div>
+      <div class="form-group"><label class="form-label">Data de submissão</label><input class="form-input" type="date" id="sm-date-submissao"></div>
+      <div class="form-group"><label class="form-label">Status</label><select class="form-select" id="sm-status" onchange="toggleSMStatusFields()"><option value="Em análise">Em análise</option><option value="Aprovada">Aprovada</option><option value="Rejeitada">Rejeitada</option></select></div>
     </div>
-    <div style="margin-top:12px;">
-      <label class="form-label">Budget by Category (leave blank to skip)</label>
+    <div class="form-group" id="sm-date-aprovacao-wrap" style="display:none;"><label class="form-label" id="sm-date-aprovacao-label">Data de aprovação/rejeição</label><input class="form-input" type="date" id="sm-date-aprovacao"></div>
+    <div id="sm-financial-fields" style="display:none;margin-top:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:8px;">
+        <div><label class="form-label" style="margin-bottom:0;">Rubricas da SM</label><div class="fs-12 color-ink3" id="sm-plan-caption">Informe o novo valor de cada rubrica alterada.</div></div>
+        <div class="form-group" id="sm-executor-filter-wrap" style="display:none;margin:0;min-width:260px;"><label class="form-label">Executor</label><select class="form-select" id="sm-executor-filter" onchange="smExecutorChanged()"></select></div>
+      </div>
       <div id="sm-categories-table" style="border:1px solid var(--border);border-radius:8px;overflow:hidden;"></div>
+    <div id="sm-add-category-controls" style="display:flex;gap:8px;align-items:end;margin-top:10px;">
+      <div class="form-group" style="flex:1;margin:0;"><label class="form-label" style="font-size:11px;">Adicionar rubrica ANP existente</label><select class="form-select" id="sm-add-cat-select"></select></div>
+      <button type="button" class="btn btn-secondary btn-sm" id="sm-add-cat-btn" onclick="addSMCategoryRow()">Adicionar rubrica</button>
+      <input type="file" id="sm-import-file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" style="display:none;" onchange="handleSMImportFile(this)">
+      <button type="button" class="btn btn-secondary btn-sm" onclick="openSMImportPicker()">Importar SM</button>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid var(--border);">
-      <div style="font-size:13px;color:var(--ink3);">Total: <strong id="sm-total-display">R$ 0</strong></div>
-    </div>
+    <div id="sm-import-preview" style="display:none;margin-top:10px;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid var(--border);"><div style="font-size:13px;color:var(--ink3);">Total do executor selecionado: <strong id="sm-total-display">R$ 0</strong></div></div>
     <div style="margin-top:12px;padding:10px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink2);">
-        <input type="checkbox" id="sm-income-enabled" onchange="toggleSMIncomeUsage()">
-        <span>Adicionar uso de rendimento</span>
-      </label>
-      <div class="form-group" id="sm-income-field" style="display:none;margin:10px 0 0;">
-        <label class="form-label">Valor do rendimento utilizado (R$)</label>
-        <input class="form-input" type="number" id="sm-income-value" min="0" step="0.01" placeholder="0">
-      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink2);"><input type="checkbox" id="sm-income-enabled" onchange="toggleSMIncomeUsage()"><span>Adicionar uso de rendimento</span></label>
+      <div class="fs-12 color-ink3" id="sm-income-executor-note" style="display:none;margin-top:7px;"></div>
+      <div class="form-group" id="sm-income-field" style="display:none;margin:10px 0 0;"><label class="form-label">Valor do rendimento utilizado (R$)</label><input class="form-input" type="number" id="sm-income-value" min="0" step="0.01" placeholder="0"></div>
     </div>
-    <div class="modal-footer">
-      <button class="btn btn-secondary" onclick="closeModal('sm-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSM()">Save SM</button>
     </div>
+    <div class="modal-footer"><button class="btn btn-secondary" onclick="closeModal('sm-modal')">Cancelar</button><button class="btn btn-primary" onclick="saveSM()">Salvar SM</button></div>
   </div>
 </div>
 
@@ -1541,7 +1525,7 @@ tr:hover td{background:var(--surface3);}
         <input class="form-input" type="date" id="sol-data-apr">
       </div>
     </div>
-    <div class="form-group">
+    <div class="form-group" id="sol-valor-group">
       <label class="form-label" id="lbl-sol-valor">Valor (R$)</label>
       <input class="form-input" type="number" id="sol-valor" min="0" step="0.01">
     </div>
@@ -1554,6 +1538,7 @@ tr:hover td{background:var(--surface3);}
       <label class="form-label" id="lbl-sol-obs">ObservaÃ§Ãµes</label>
       <input class="form-input" id="sol-obs">
     </div>
+    <div id="sol-sm-items-editor" style="display:none;margin-top:14px;"></div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('sol-modal')">Cancelar</button>
       <button class="btn btn-primary" onclick="saveSolModal()" id="btn-sol-save">Salvar</button>
@@ -2313,6 +2298,11 @@ function isMilestoneCompleted(status){
   const s=normLooseText(status).replace(/[\s_-]+/g,'');
   return ['completo','concluido','concluida','completed','complete'].includes(s);
 }
+function isMilestoneSuspended(marco){
+  const forecast=normLooseText(milestoneForecastValue(marco));
+  const status=normLooseText(marco?.Status||marco?._userStatus||'');
+  return ['suspenso','suspended'].includes(forecast)||['suspenso','suspended'].includes(status);
+}
 function milestoneForecastValue(marco){
   return marco?.['Data prevista / Data de entrega']??marco?.Data_Prevista??marco?.Forecast??'';
 }
@@ -2320,7 +2310,7 @@ function milestoneDateBucket(marco){
   if(isMilestoneCompleted(marco?.Status)) return 'Completed';
   const dp=milestoneForecastValue(marco);
   const normalizedStatus=normLooseText(marco?.Status);
-  if(!dp||String(dp).trim().toLowerCase()==='suspended'||normalizedStatus==='suspenso'||normalizedStatus==='suspended') return 'Suspended';
+  if(!dp||isMilestoneSuspended(marco)) return 'Suspended';
   const date=parseMilestoneDate(dp);
   if(!date||isNaN(date.getTime())) return 'Planned';
   const today=new Date(); today.setHours(0,0,0,0);
@@ -2935,6 +2925,7 @@ function normalizeSMItem(r){
   return {
     Projeto           : r.Projeto||'',
     'SM#'             : r.Numero_SM||'',
+    Executor          : r.Executor||'',
     Categoria_despesa : r.Categoria||'',
     Valor             : parseFloat(r.Valor)||0,
   };
@@ -3031,6 +3022,23 @@ async function appendExcelRow(sheet, values){
   await excelPatchRange(sheet, addr, [values]);
 }
 
+// 29/07: appendExcelRow() chamado em loop (N linhas = N pares "ler usedRange, escrever") sofre corrida
+// no Excel Online: o usedRange nem sempre reflete o PATCH anterior a tempo da proxima leitura, entao duas
+// chamadas seguidas podem calcular a MESMA proxima linha e uma sobrescreve a outra - perda silenciosa de
+// linha, so visivel depois de recarregar (era o "categoria some depois do reload" na SM11 do P004). Uma
+// unica leitura + um unico PATCH cobrindo todas as linhas elimina a corrida. Usar sempre que for gravar
+// mais de uma linha nova na mesma operacao (ex.: SM com varias categorias, Plano_Orcamentario com varias
+// categorias novas).
+async function appendExcelRows(sheet, rowsValues){
+  if(!rowsValues || !rowsValues.length) return;
+  const rowCount = await excelGetUsedRowCount(sheet);
+  const startRow = rowCount + 1;
+  const endRow   = startRow + rowsValues.length - 1;
+  const nCols    = rowsValues.reduce((m,r)=>Math.max(m,r.length),0);
+  const addr     = `A${startRow}:${colLetter(nCols)}${endRow}`;
+  await excelPatchRange(sheet, addr, rowsValues);
+}
+
 async function rewriteExcelSheet(sheet, headers, dataRows){
   // Reescreve toda a sheet: header na linha 1, dados a partir da linha 2.
   // Se a nova versao tiver menos linhas, limpa a cauda antiga para nao deixar registros orfaos.
@@ -3052,6 +3060,14 @@ function smNumber(raw){
   const num=parseInt(String(raw||'').replace(/\D/g,''),10);
   return Number.isFinite(num) ? num : NaN;
 }
+function solicitacaoNumberCompare(a,b){
+  const rawA=a?.Numero||a?.['SM#']||a?.Numero_Item||'';
+  const rawB=b?.Numero||b?.['SM#']||b?.Numero_Item||'';
+  const numA=smNumber(rawA),numB=smNumber(rawB);
+  if(Number.isFinite(numA)&&Number.isFinite(numB)&&numA!==numB) return numA-numB;
+  if(Number.isFinite(numA)!==Number.isFinite(numB)) return Number.isFinite(numA)?-1:1;
+  return String(rawA).localeCompare(String(rawB),undefined,{numeric:true,sensitivity:'base'});
+}
 
 function latestSMInfo(pid){
   let best=null;
@@ -3063,9 +3079,6 @@ function latestSMInfo(pid){
     if(!best||num>best.num) best={num,label};
   };
   (DATA.sms||[]).filter(s=>s.Projeto===pid).forEach(s=>consider(s['SM#']||s.Numero_SM||s.Numero));
-  (DATA.solicitacoes||[])
-    .filter(s=>s.Projeto===pid && /^sm$/i.test(String(s.Tipo||'SM')))
-    .forEach(s=>consider(s['SM#']||s.Numero_Item||s.Numero_SM||s.Numero));
   if(!best) return null;
   return {
     num:best.num,
@@ -3073,25 +3086,46 @@ function latestSMInfo(pid){
   };
 }
 
-function currentPlanMap(pid){
-  const base={};
-  DATA.plano.filter(r=>r.Projeto===pid).forEach(r=>{
-    const cat=r.Categoria_despesa;
-    if(cat) base[cat]=(base[cat]||0)+parseFloat(r['Plano_PTR-B']||0);
+function currentPlanMap(pid, execFilter='ALL'){
+  const filterExecutor=execFilter && execFilter!=='ALL' ? String(execFilter).trim() : '';
+  const pairKey=(cat,executor)=>`${cat}\u0001${executor}`;
+  const baseByPair=new Map();
+  (DATA.plano||[]).filter(r=>r.Projeto===pid).forEach(r=>{
+    const cat=String(r.Categoria_despesa||'').trim();
+    const executor=String(r.Executor||'').trim();
+    if(!cat) return;
+    const key=pairKey(cat,executor);
+    baseByPair.set(key,{cat,executor,value:(baseByPair.get(key)?.value||0)+(parseFloat(r['Plano_PTR-B']||0)||0)});
   });
   const latest=latestSMInfo(pid);
-  if(!latest) return base;
+  if(!latest){
+    const base={};
+    [...baseByPair.values()].filter(row=>!filterExecutor||row.executor===filterExecutor).forEach(row=>{
+      base[row.cat]=(base[row.cat]||0)+row.value;
+    });
+    return base;
+  }
 
-  const smCats={};
+  const overridesByPair=new Map();
+  const legacyOverrides=new Map();
   (DATA.sms||[]).filter(s=>s.Projeto===pid && smNumber(s['SM#']||s.Numero_SM||s.Numero)===latest.num).forEach(s=>{
-    const cat=s.Categoria_despesa;
-    if(cat) smCats[cat]=(smCats[cat]||0)+parseFloat(s.Valor||0);
+    const cat=String(s.Categoria_despesa||'').trim();
+    const executor=String(s.Executor||'').trim();
+    if(!cat) return;
+    if(executor) overridesByPair.set(pairKey(cat,executor),{cat,executor,value:parseFloat(s.Valor||0)||0});
+    else legacyOverrides.set(cat,parseFloat(s.Valor||0)||0);
   });
 
+  const effectiveByPair=new Map(baseByPair);
+  overridesByPair.forEach((row,key)=>effectiveByPair.set(key,row));
   const out={};
-  [...new Set([...Object.keys(base),...Object.keys(smCats)])].forEach(cat=>{
-    out[cat]=Object.prototype.hasOwnProperty.call(smCats,cat) ? smCats[cat] : 0;
+  [...effectiveByPair.values()].filter(row=>!filterExecutor||row.executor===filterExecutor).forEach(row=>{
+    out[row.cat]=(out[row.cat]||0)+row.value;
   });
+  if(!filterExecutor){
+    // Linhas antigas sem executor mantêm o comportamento histórico até a base ser normalizada.
+    legacyOverrides.forEach((value,cat)=>{ out[cat]=value; });
+  }
   return out;
 }
 
@@ -3108,10 +3142,11 @@ function currentPlanHeader(pid,L){
 function applySMOverrides(){
   DATA.plano.forEach(r=>{ r.Plano_Atual=parseFloat(r['Plano_PTR-B']||0)||0; });
   const pids=[...new Set([...(DATA.plano||[]).map(r=>r.Projeto),...(DATA.sms||[]).map(s=>s.Projeto)])].filter(Boolean);
-  const maps=Object.fromEntries(pids.map(pid=>[pid,currentPlanMap(pid)]));
   DATA.plano.forEach(r=>{
-    const latest=latestSMInfo(r.Projeto);
-    if(latest) r.Plano_Atual=maps[r.Projeto]?.[r.Categoria_despesa]||0;
+    if(!latestSMInfo(r.Projeto)) return;
+    const executor=String(r.Executor||'').trim()||'ALL';
+    const current=currentPlanMap(r.Projeto,executor);
+    if(Object.prototype.hasOwnProperty.call(current,r.Categoria_despesa)) r.Plano_Atual=current[r.Categoria_despesa];
   });
 }
 
@@ -3887,10 +3922,10 @@ function renderProjectDetail(pid){
         </tr></thead>
         <tbody>
           ${projMarcos.map(m=>{
-            const isSusp=String(m['Data prevista / Data de entrega']).toLowerCase()==='suspended';
+            const isSusp=isMilestoneSuspended(m);
             const origIdx=milestoneIndexByKey(m._localKey);
             const key=escapeAttr(m._localKey);
-            return `<tr class="milestone-row" onclick="openMilestoneModal('edit','${key}')">
+            return `<tr class="milestone-row"${isSusp?' style="color:var(--ink3);"':''} onclick="openMilestoneModal('edit','${key}')">
               <td class="fw-600 fs-12">${escapeHtml(m.ID||EMPTY)}</td>
               <td class="fs-12" style="max-width:300px;">${escapeHtml(milestoneDescription(m))}</td>
               <td class="fs-12 color-ink3">${FMTD(m['Data Base'])}</td>
@@ -4241,12 +4276,12 @@ function renderMilestones(){
   marcos.forEach(m=>{
     const origIdx=milestoneIndexByKey(m._localKey);
     const key=escapeAttr(m._localKey);
-    const isSuspended=String(m['Data prevista / Data de entrega']).toLowerCase()==='suspended';
+    const isSuspended=isMilestoneSuspended(m);
     const forecastValue=m['Data prevista / Data de entrega']?String(m['Data prevista / Data de entrega']).split('T')[0]:'';
     const dateCell=isSuspended
       ? '<span class="badge badge-gray">'+t('suspended')+'</span>'
       : '<input type="date" class="form-input fs-12" style="padding:4px 8px;max-width:140px;" value="'+escapeAttr(forecastValue)+'" onchange="updateMilestoneDate('+origIdx+',this.value)">';
-    tbody.innerHTML+='<tr class="milestone-row" onclick="openMilestoneModal(\'edit\',\''+key+'\')">'
+    tbody.innerHTML+='<tr class="milestone-row"'+(isSuspended?' style="color:var(--ink3);"':'')+' onclick="openMilestoneModal(\'edit\',\''+key+'\')">'
       +'<td class="fw-600 fs-12">'+escapeHtml(m.ID||EMPTY)+'</td>'
       +'<td class="fs-12">'+escapeHtml(m.Projeto||EMPTY)+'</td>'
       +'<td class="fs-12" style="max-width:320px;">'+escapeHtml(milestoneDescription(m))+'</td>'
@@ -4498,7 +4533,20 @@ function catCompare(a,b){
 }
 // Ordenacao alfabetica dedicada a aba Budget Lines/Rubricas (linhas da pivot), a pedido do usuario (29/07).
 // Nao substitui catCompare: SM modal, Por Categoria ANP e PDFs continuam pela ordem das abas do Excel.
+// 29/07: o pedido original era ordenar pelo CODIGO ABA (nao pelo nome da categoria) em ordem alfabetica.
+// Um localeCompare puro no codigo (string) falha porque varios codigos tem letra+numero (N1/N2, T1/T2/T3,
+// G1/G2) - comparacao de texto simples intercala mal (ex.: "N10" < "N2" como string). Separamos o prefixo
+// de letra do sufixo numerico: agrupa por letra (ordem alfabetica) e, dentro do grupo, ordena o numero
+// como inteiro (N1 antes de N2, T1 antes de T2 antes de T3).
 function catCompareAlpha(a,b){
+  const parseAba=(cat)=>{
+    const code=String(getCatABA(cat)||'').trim().toUpperCase();
+    const m=code.match(/^([A-Z]*)(\d*)$/);
+    return m ? {letter:m[1], num:m[2]?parseInt(m[2],10):-1} : {letter:code, num:-1};
+  };
+  const pa=parseAba(a), pb=parseAba(b);
+  if(pa.letter!==pb.letter) return pa.letter.localeCompare(pb.letter);
+  if(pa.num!==pb.num) return pa.num-pb.num;
   return String(a||'').localeCompare(String(b||''),'pt',{sensitivity:'base'});
 }
 
@@ -4598,11 +4646,12 @@ function rubProjectExecutors(pid){
   const vals=[
     ...DATA.plano.filter(r=>r.Projeto===pid).map(r=>r.Executor),
     ...DATA.gastos.filter(g=>(g.Projetos||g.Projeto)===pid).map(g=>g.Executor),
+    ...DATA.sms.filter(s=>s.Projeto===pid).map(s=>s.Executor),
   ];
   return [...new Set(vals.map(v=>String(v||'').trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
 }
-function rubLatestSMPlanMap(pid){
-  return currentPlanMap(pid);
+function rubLatestSMPlanMap(pid, execFilter='ALL'){
+  return currentPlanMap(pid,execFilter);
 }
 function rubResolveExecutor(pid, exec){
   if(exec && exec!=='ALL') return exec;
@@ -4621,7 +4670,7 @@ function rubResolveExecutor(pid, exec){
 function buildRubPivot(pid, execFilter){
   const executors=rubProjectExecutors(pid);
   const hasMultiExec=executors.length>1;
-  const showCurrentPlan=!(hasMultiExec && execFilter && execFilter!=='ALL');
+  const showCurrentPlan=true;
   let gastos = DATA.gastos.filter(g => (g.Projetos||g.Projeto) === pid);
   const planoAll = DATA.plano.filter(r => r.Projeto === pid);
   let plano  = planoAll;
@@ -4644,11 +4693,11 @@ function buildRubPivot(pid, execFilter){
   });
   if(showCurrentPlan){
     const basePtrbMap={};
-    planoAll.forEach(r=>{
+    plano.forEach(r=>{
       const cc=r.Categoria_despesa;
       basePtrbMap[cc]=(basePtrbMap[cc]||0)+parseFloat(r['Plano_PTR-B']||0);
     });
-    const smPlanMap=rubLatestSMPlanMap(pid);
+    const smPlanMap=rubLatestSMPlanMap(pid,execFilter);
     [...new Set([...Object.keys(basePtrbMap),...Object.keys(smPlanMap)])].forEach(cat=>{
       planMap[cat]=Object.prototype.hasOwnProperty.call(smPlanMap,cat) ? smPlanMap[cat] : (basePtrbMap[cat]||0);
     });
@@ -4767,6 +4816,10 @@ function renderRubricas(){
     const blocks=projs.map(p=>renderRubReadonlyTable(p.Projeto)).filter(Boolean).join('');
     document.getElementById('rubricas-content').innerHTML = blocks ||
       `<div class="card empty-state" style="padding:48px;">${L?'Sem dados de rubricas.':'No budget line data.'}</div>`;
+    // 29/07: renderRubricas() pode ser chamada direto pelo onchange do filtro de executor, sem passar
+    // por navigate()/renderCurrentPage() (unico lugar que chamava sanitizeVisibleMojibake antes). Sem
+    // isso, placeholders "sem dado" (ex. o traco em col-plan/col-pct) ficavam com o mojibake cru na tela.
+    sanitizeVisibleMojibake(document.getElementById('rubricas-content'));
     window._rubState=null;
     return;
   }
@@ -4908,6 +4961,7 @@ function renderRubricas(){
         <button class="btn btn-primary btn-sm" onclick="saveRubEdits()">${L?'Salvar alterações':'Save changes'}</button>
       </div>
     </div>`;
+  sanitizeVisibleMojibake(document.getElementById('rubricas-content'));
 
   // Store months/cats for edit functions
   window._rubState = { months, allCats, pFilter, execFilter, hasMultiExec, canEdit, showCurrentPlan, planMap, ptrbMap };
@@ -5629,7 +5683,7 @@ function _rptBodyCell(d, text, widthDxa, opts={}){
     fitText:!!opts.fitText,
     margins:{top:60,bottom:60,left:120,right:120},
     children:[new d.Paragraph({
-      children:[new d.TextRun({text:String(text||''),size:opts.size||20,font:'Calibri',bold:!!opts.bold})],
+      children:[new d.TextRun({text:String(text||''),size:opts.size||20,font:'Calibri',bold:!!opts.bold,color:opts.color||undefined})],
       alignment: opts.center ? d.AlignmentType.CENTER : d.AlignmentType.LEFT,
       keepLines:!!opts.noWrap,
     })]
@@ -5861,13 +5915,14 @@ function _rptProjectSection(d, proj, tableCounter, mesAno){
           _rptHdrCell(d,'Baseline',c3,{center:true}),_rptHdrCell(d,'Forecast',c4,{center:true}),_rptHdrCell(d,'Status',c5),
         ]}),
         ...marcos.map(m=>{
-          const status=_rptStatus(m.Status),completed=status==='Completed';
+          const status=_rptStatus(m.Status),completed=status==='Completed',suspended=isMilestoneSuspended(m);
+          const textColor=suspended?'7A7F85':undefined;
           return new d.TableRow({children:[
-            _rptBodyCell(d,_rptNoBreakText(m.ID),c1,{center:true}),
-            _rptBodyCell(d,_rptField(m,['Descri\u00e7\u00e3o','Descricao','Description']),c2),
-            _rptBodyCell(d,FMTD(m['Data Base']||''),c3,{center:true}),
-            _rptBodyCell(d,FMTD(m['Data prevista / Data de entrega']||''),c4,{center:true}),
-            _rptBodyCell(d,status,c5,{shading:completed?'D9EAD3':undefined}),
+            _rptBodyCell(d,_rptNoBreakText(m.ID),c1,{center:true,color:textColor}),
+            _rptBodyCell(d,_rptField(m,['Descri\u00e7\u00e3o','Descricao','Description']),c2,{color:textColor}),
+            _rptBodyCell(d,FMTD(m['Data Base']||''),c3,{center:true,color:textColor}),
+            _rptBodyCell(d,FMTD(m['Data prevista / Data de entrega']||''),c4,{center:true,color:textColor}),
+            _rptBodyCell(d,status,c5,{shading:completed?'D9EAD3':undefined,color:textColor}),
           ]});
         })
       ]
@@ -5891,7 +5946,7 @@ function _rptProjectSection(d, proj, tableCounter, mesAno){
     const cat=g.Categoria_despesa||'';
     gastosMap[cat]=(gastosMap[cat]||0)+Number(g.Valor||0);
   });
-  const cats = Object.keys(planMap);
+  const cats = Object.keys(planMap).sort(catCompareAlpha);
   const tc2 = tableCounter[0]++;
   children.push(_rptCaption(d, `Table ${tc2}: Cost status of project ${pnum}.`));
   if(cats.length===0){
@@ -5900,23 +5955,22 @@ function _rptProjectSection(d, proj, tableCounter, mesAno){
     const cW=9026,c1=2800,c2=900,c3=1400,c4=1400,c5=1400,c6=1126;
     children.push(new d.Table({
       width:{size:cW,type:d.WidthType.DXA},
-      columnWidths:[c1,c2,c3,c4,c5,c6],
+      columnWidths:[c2,c1,c3,c4,c5,c6],
       rows:[
         new d.TableRow({tableHeader:true,children:[
-          _rptHdrCell(d,'Category',c1),_rptHdrCell(d,'ABA',c2,{center:true}),
+          _rptHdrCell(d,'ABA',c2,{center:true}),_rptHdrCell(d,'Category',c1),
           _rptHdrCell(d,'PTR-B (R$)',c3,{center:true}),_rptHdrCell(d,'Curr. Plan (R$)',c4,{center:true}),
           _rptHdrCell(d,'Actuals (R$)',c5,{center:true}),_rptHdrCell(d,'Exec%',c6,{center:true}),
         ]}),
-        ...cats.sort((a,b)=>catCompare(a,b)).map(cat=>{
+        ...cats.map(cat=>{
           const planRow = (DATA.plano||[]).find(p=>p.Projeto===pid&&p.Categoria_despesa===cat)||{};
           const ptrb = Number(planRow['Plano_PTR-B']||0);
           const plan = Number(planMap[cat]||0);
           const actual = Number(gastosMap[cat]||0);
-          const pct = plan>0 ? (actual/plan*100).toFixed(1)+'%' : '—';
           const fmtR = v=>v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
           const aba = planRow.Codigo_ABA||getCatABA(cat)||'';
           return new d.TableRow({height:{value:567,rule:d.HeightRule.EXACT},children:[
-            _rptBodyCell(d,_rptCategory(cat),c1,{size:18,verticalCenter:true}),_rptBodyCell(d,aba,c2,{center:true,verticalCenter:true}),
+            _rptBodyCell(d,aba,c2,{center:true,verticalCenter:true}),_rptBodyCell(d,_rptCategory(cat),c1,{size:18,verticalCenter:true}),
             _rptBodyCell(d,fmtR(ptrb),c3,{center:true,verticalCenter:true}),_rptBodyCell(d,fmtR(plan),c4,{center:true,verticalCenter:true}),
             _rptBodyCell(d,fmtR(actual),c5,{center:true,verticalCenter:true}),_rptBodyCell(d,_rptPct(plan?actual/plan:NaN),c6,{center:true,verticalCenter:true}),
           ]});
@@ -5926,7 +5980,7 @@ function _rptProjectSection(d, proj, tableCounter, mesAno){
   }
 
   // SM table
-  const sms = (DATA.solicitacoes||[]).filter(s=>s.Projeto===pid&&s.Tipo==='SM');
+  const sms = (DATA.solicitacoes||[]).filter(s=>s.Projeto===pid&&s.Tipo==='SM').sort(solicitacaoNumberCompare);
   if(sms.length>0){
     const tc=tableCounter[0]++;
     const sw=9026,s1=1000,s2=1500,s3=1500,s4=2000,s5=3026;
@@ -5948,7 +6002,7 @@ function _rptProjectSection(d, proj, tableCounter, mesAno){
   }
 
   // DV table
-  const dvs = (DATA.solicitacoes||[]).filter(s=>s.Projeto===pid&&s.Tipo==='DV');
+  const dvs = (DATA.solicitacoes||[]).filter(s=>s.Projeto===pid&&s.Tipo==='DV').sort(solicitacaoNumberCompare);
   if(dvs.length>0){
     const tc=tableCounter[0]++;
     const dw=9026,d1=1000,d2=1500,d3=1500,d4=2000,d5=3026;
@@ -5970,7 +6024,7 @@ function _rptProjectSection(d, proj, tableCounter, mesAno){
   }
 
   // DE table
-  const des = (DATA.solicitacoes||[]).filter(s=>s.Projeto===pid&&s.Tipo==='DE');
+  const des = (DATA.solicitacoes||[]).filter(s=>s.Projeto===pid&&s.Tipo==='DE').sort(solicitacaoNumberCompare);
   if(des.length>0){
     const tc=tableCounter[0]++;
     const ew=9026,e1=1000,e2=1500,e3=1500,e4=2000,e5=3026;
@@ -6351,7 +6405,7 @@ function renderSMs(){
   const rows=(DATA.solicitacoes||[])
     .filter(s=>visibleProjs.includes(s.Projeto))
     .filter(s=>(s.Tipo||'SM')===smTypeFilter)
-    .sort((a,b)=>(a.Projeto||'').localeCompare(b.Projeto||'') || (a.Data_Submissao||'').localeCompare(b.Data_Submissao||''));
+    .sort((a,b)=>(a.Projeto||'').localeCompare(b.Projeto||'') || solicitacaoNumberCompare(a,b));
 
   const buttons = `
     <div style="display:flex;gap:8px;margin-bottom:20px;">
@@ -6426,6 +6480,7 @@ function smItemCellFor(header, s){
   const h=normLooseText(header).replace(/[ _]/g,'').toLowerCase();
   if(h==='projeto') return s.Projeto||'';
   if(h==='numerosm'||h==='sm#'||h==='sm'||h==='numero') return s['SM#']||s.Numero_SM||s.Numero||'';
+  if(h==='executor') return s.Executor||'';
   if(h==='categoria'||h==='categoriadespesa') return s.Categoria_despesa||s.Categoria||'';
   if(h==='valor') return parseFloat(s.Valor||0)||0;
   return s[header]||'';
@@ -6433,7 +6488,7 @@ function smItemCellFor(header, s){
 async function rewriteSMItensSheetFromMemory(){
   const headers=(DATA._headers&&DATA._headers.SM_Itens&&DATA._headers.SM_Itens.length)
     ? DATA._headers.SM_Itens
-    : ['Projeto','Numero_SM','Categoria','Valor'];
+    : ['Projeto','Numero_SM','Categoria','Valor','Executor'];
   const dataRows=(DATA.sms||[]).map(s=>headers.map(h=>smItemCellFor(h,s)));
   await rewriteExcelSheet('SM_Itens', headers, dataRows);
 }
@@ -6453,7 +6508,7 @@ function replaceUsoRendimentoForSM(oldPid, oldNumero, newRec){
   }
 }
 function projectExecutorForUso(pid){
-  const selected=document.getElementById('sm-new-cat-executor')?.value||'';
+  const selected=document.getElementById('sm-executor-filter')?.value||'';
   if(selected) return selected;
   const executors=(typeof rubProjectExecutors==='function') ? rubProjectExecutors(pid).filter(Boolean) : [];
   if(executors.length===1) return executors[0];
@@ -6462,14 +6517,14 @@ function projectExecutorForUso(pid){
 }
 function syncSolIncomeUsageFields(value){
   const tipo=document.getElementById('sol-tipo')?.value||'';
-  const group=document.getElementById('sol-income-group');
-  const input=document.getElementById('sol-income-usage');
-  const show=/^sm$/i.test(tipo);
-  if(group) group.style.display=show?'block':'none';
-  if(input){
-    if(value!==undefined) input.value=value||'';
-    if(!show) input.value='';
-  }
+  const incomeGroup=document.getElementById('sol-income-group');
+  const incomeInput=document.getElementById('sol-income-usage');
+  const valueGroup=document.getElementById('sol-valor-group');
+  const isSM=/^sm$/i.test(tipo);
+  if(incomeGroup) incomeGroup.style.display=isSM?'block':'none';
+  if(valueGroup) valueGroup.style.display=isSM?'none':'block';
+  if(incomeInput){ if(value!==undefined)incomeInput.value=value||''; if(!isSM)incomeInput.value=''; }
+  if(!isSM) renderSolSMItemsEditor(null);
 }
 function toggleSMIncomeUsage(){
   const checked=!!document.getElementById('sm-income-enabled')?.checked;
@@ -6477,6 +6532,172 @@ function toggleSMIncomeUsage(){
   const input=document.getElementById('sm-income-value');
   if(field) field.style.display=checked?'block':'none';
   if(!checked && input) input.value='';
+}
+
+// Importação local da ferramenta oficial de Controle de Mudanças (SM) v13.
+// O arquivo nunca é enviado: o painel lê o .xlsx no navegador e o usuário vincula os nomes extraídos.
+let smImportedPayload=null;
+function smImportNormalize(value){
+  return normLooseText(String(value||'')).replace(/\s+/g,' ').trim().toLowerCase();
+}
+function smImportMapKey(pid){
+  return `inovatus_sm_executor_map:${location.pathname||'local'}:${pid}`;
+}
+function smImportReadMap(pid){
+  try { return JSON.parse(localStorage.getItem(smImportMapKey(pid))||'{}')||{}; }
+  catch(_e){ return {}; }
+}
+function smImportRememberMap(pid, mappings){
+  const current=smImportReadMap(pid);
+  Object.entries(mappings).forEach(([source,target])=>{ if(source&&target) current[smImportNormalize(source)]=target; });
+  try { localStorage.setItem(smImportMapKey(pid),JSON.stringify(current)); } catch(_e){}
+}
+function smImportProjectExecutors(pid){
+  const found=rubProjectExecutors(pid);
+  if(found.length) return found;
+  const project=(DATA.projetos||[]).find(p=>p.Projeto===pid);
+  return project?.Executor ? [String(project.Executor).trim()] : [];
+}
+function smImportResolveCategory(pid, aba, label){
+  const normalizedLabel=smImportNormalize(label);
+  const candidates=[...(DATA.categorias||[]).flatMap(c=>[c.Categoria_despesa_PT,c.Categoria_despesa_ENG]),...(DATA.plano||[]).filter(r=>r.Projeto===pid).map(r=>r.Categoria_despesa),...(DATA.sms||[]).filter(r=>r.Projeto===pid).map(r=>r.Categoria_despesa)].filter(Boolean);
+  const exact=candidates.find(category=>smImportNormalize(category)===normalizedLabel);
+  if(exact) return exact;
+  // A ferramenta SM pode variar conectivos e singular/plural; isso não deve mudar a rubrica.
+  const comparable=value=>smImportNormalize(value).split(' ').filter(word=>!['a','as','o','os','de','da','das','do','dos','e','ou','para','em'].includes(word)).map(word=>word.endsWith('ais')?`${word.slice(0,-3)}al`:word.endsWith('s')?word.slice(0,-1):word).join(' ');
+  const normalizedComparable=comparable(label);
+  const equivalent=candidates.find(category=>comparable(category)===normalizedComparable);
+  if(equivalent) return equivalent;
+  // ABA é fallback apenas quando é inequívoco: N, G, R e T possuem mais de uma rubrica.
+  const normalizedAba=String(aba||'').trim().toUpperCase();
+  const abaCandidates=[...new Set((DATA.categorias||[]).filter(c=>String(c.ABA||c.Codigo_ABA||'').trim().toUpperCase()===normalizedAba).flatMap(c=>[c.Categoria_despesa_PT,c.Categoria_despesa_ENG]).filter(Boolean))];
+  return abaCandidates.length===1?abaCandidates[0]:'';
+}
+function smImportSuggestedExecutor(pid, sourceExecutor, executors){
+  const mapped=smImportReadMap(pid)[smImportNormalize(sourceExecutor)];
+  if(mapped && executors.includes(mapped)) return mapped;
+  const normalized=smImportNormalize(sourceExecutor);
+  return executors.find(executor=>smImportNormalize(executor)===normalized)||'';
+}
+function openSMImportPicker(){
+  if(!smStatusAllowsFinancialData(document.getElementById('sm-status')?.value)){
+    alert(lang==='pt'?'A importação fica disponível somente para SM Aprovada ou Rejeitada.':'Import is available only for Approved or Rejected SMs.');
+    return;
+  }
+  document.getElementById('sm-import-file')?.click();
+}
+function smImportShowError(message){
+  const preview=document.getElementById('sm-import-preview');
+  if(!preview) return;
+  preview.style.display='block';
+  preview.innerHTML=`<div class="alert-box alert-red" style="margin:0;">${escapeHtml(message)}</div>`;
+}
+async function handleSMImportFile(input){
+  const file=input?.files?.[0];
+  if(!file) return;
+  const pid=document.getElementById('sm-project')?.value||'';
+  if(!smStatusAllowsFinancialData(document.getElementById('sm-status')?.value)){ smImportShowError(lang==='pt'?'A importação fica disponível somente para SM Aprovada ou Rejeitada.':'Import is available only for Approved or Rejected SMs.'); input.value=''; return; }
+  if(!pid){ smImportShowError(lang==='pt'?'Selecione o projeto antes de importar a planilha SM.':'Select the project before importing a SM workbook.'); input.value=''; return; }
+  try {
+    if(!window.XLSX) throw new Error('Biblioteca de planilha indisponível.');
+    const workbook=XLSX.read(await file.arrayBuffer(),{type:'array',cellFormula:false,cellText:false});
+    const capaSheet=workbook.Sheets['Capa'];
+    const historicoSheet=workbook.Sheets['Historico'];
+    if(!capaSheet||!historicoSheet) throw new Error('Arquivo incompatível: são necessárias as abas Capa e Historico da ferramenta SM v13.');
+    const smNumberLabel=String(capaSheet['F3']?.v||'').trim();
+    const requestedSm=smNumber(smNumberLabel);
+    if(!smNumberLabel||Number.isNaN(requestedSm)) throw new Error('Não foi possível identificar a SM atual em Capa!F3.');
+    const currentNumber=document.getElementById('sm-number')?.value?.trim()||'';
+    if(editingSMIdx!==null&&smNumber(currentNumber)!==requestedSm) throw new Error(`O arquivo é ${smNumberLabel}, mas esta edição é ${currentNumber}. Importe a planilha correspondente à mesma SM.`);
+    const range=XLSX.utils.decode_range(historicoSheet['!ref']);
+    const smColumn=(()=>{
+      for(const headerRow of [3,32,61]){
+        for(let col=range.s.c;col<=range.e.c;col++){
+          const value=historicoSheet[XLSX.utils.encode_cell({c:col,r:headerRow-1})]?.v;
+          if(smNumber(value)===requestedSm) return col;
+        }
+      }
+      return -1;
+    })();
+    if(smColumn<0) throw new Error(`A coluna ${smNumberLabel} não foi encontrada no Histórico.`);
+    const valueAt=(row,col)=>historicoSheet[XLSX.utils.encode_cell({c:col,r:row-1})]?.v;
+    const sourceExecutors=[String(capaSheet['C7']?.v||'').trim(),String(capaSheet['C8']?.v||'').trim()].filter(Boolean);
+    if(!sourceExecutors.length) throw new Error('Nenhum executor foi encontrado em Capa!C7/C8.');
+    const blocks=[33,62];
+    const groups=sourceExecutors.map((sourceExecutor,index)=>{
+      const start=blocks[index], rows=[];
+      for(let offset=0;offset<22;offset++){
+        const row=start+offset, aba=valueAt(row,2), label=valueAt(row,3), category=smImportResolveCategory(pid,aba,label);
+        if(!category) throw new Error(`Rubrica não reconhecida pelo painel: ${label||aba||'(vazia)'}.`);
+        const rawValue=valueAt(row,smColumn);
+        const value=rawValue===undefined||rawValue===null||String(rawValue).trim()===''?0:Number(rawValue);
+        if(!Number.isFinite(value)) throw new Error(`Valor inválido no Histórico para ${sourceExecutor} / ${category}.`);
+        rows.push({category,aba:String(aba||''),value});
+      }
+      return {sourceExecutor,rows};
+    });
+    const totalRows=Array.from({length:22},(_,index)=>Number(valueAt(4+index,smColumn))||0);
+    const splitRows=Array.from({length:22},(_,index)=>groups.reduce((sum,group)=>sum+(group.rows[index]?.value||0),0));
+    const divergence=totalRows.findIndex((value,index)=>Math.abs(value-splitRows[index])>0.01);
+    if(divergence>=0) throw new Error(`O Histórico não fecha por executor na rubrica ${groups[0].rows[divergence].category}. Revise a ferramenta SM antes de importar.`);
+    smImportedPayload={fileName:file.name,smNumber:smNumberLabel,groups};
+    renderSMImportPreview();
+  } catch(error) {
+    smImportedPayload=null;
+    smImportShowError((lang==='pt'?'Não foi possível importar: ':'Could not import: ')+(error?.message||error));
+  } finally { input.value=''; }
+}
+function renderSMImportPreview(){
+  const preview=document.getElementById('sm-import-preview');
+  const pid=document.getElementById('sm-project')?.value||'';
+  if(!preview||!smImportedPayload||!pid) return;
+  const executors=smImportProjectExecutors(pid);
+  if(!executors.length){ smImportShowError(lang==='pt'?'O projeto não possui executores cadastrados na base.':'The project has no executors registered in the workbook.'); return; }
+  preview.style.display='block';
+  const groups=smImportedPayload.groups.map((group,index)=>{
+    const suggestion=smImportSuggestedExecutor(pid,group.sourceExecutor,executors);
+    const options=[`<option value="">${lang==='pt'?'Selecione o executor':'Select executor'}</option>`,...executors.map(executor=>`<option value="${escapeAttr(executor)}"${executor===suggestion?' selected':''}>${escapeHtml(executor)}</option>`)].join('');
+    const total=group.rows.reduce((sum,row)=>sum+(parseFloat(row.value)||0),0);
+    const rows=group.rows.map((row,rowIndex)=>`<tr><td class="fw-600 fs-12 color-ink3">${escapeHtml(row.aba||'-')}</td><td>${escapeHtml(row.category)}</td><td><input type="number" min="0" step="0.01" class="form-input" data-sm-import-value="${index}:${rowIndex}" value="${escapeAttr(row.value)}" style="min-width:150px;text-align:right;"></td></tr>`).join('');
+    return `<div class="card" style="padding:10px;margin-top:10px;box-shadow:none;"><div class="form-grid" style="align-items:end;"><div><div class="form-label">${lang==='pt'?'Executor extraído':'Excel executor'}</div><div class="fw-600">${escapeHtml(group.sourceExecutor)}</div></div><div class="form-group" style="margin:0;"><label class="form-label">${lang==='pt'?'Executor na base do painel':'Panel executor'}</label><select class="form-select" data-sm-import-group="${index}">${options}</select></div><div class="text-right fs-12 color-ink3">${lang==='pt'?'Total extraído':'Extracted total'}<br><strong>${SM_MONEY_FULL.format(total)}</strong></div></div><div class="table-scroll" style="max-height:260px;margin-top:8px;border:1px solid var(--border);border-radius:6px;"><table style="font-size:12px;"><thead><tr><th>ABA</th><th>${lang==='pt'?'Categoria':'Category'}</th><th class="text-right">${lang==='pt'?'Valor a importar':'Value to import'}</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  }).join('');
+  preview.innerHTML=`<div class="card" style="padding:12px;border-color:var(--amber);"><div class="fw-600">${lang==='pt'?'Prévia da importação':'Import preview'} · ${escapeHtml(smImportedPayload.smNumber)}</div><div class="fs-12 color-ink3" style="margin-top:3px;">${escapeHtml(smImportedPayload.fileName)}. Revise executor e valores; nenhum dado será salvo até clicar em Salvar SM.</div>${groups}<div style="display:flex;gap:8px;margin-top:10px;"><button type="button" class="btn btn-primary btn-sm" onclick="applySMImport()">${lang==='pt'?'Aplicar à SM':'Apply to SM'}</button><button type="button" class="btn btn-secondary btn-sm" onclick="clearSMImportPreview()">${lang==='pt'?'Cancelar':'Cancel'}</button></div></div>`;
+}
+function clearSMImportPreview(){
+  smImportedPayload=null;
+  const preview=document.getElementById('sm-import-preview');
+  if(preview){ preview.style.display='none'; preview.innerHTML=''; }
+}
+function applySMImport(){
+  const pid=document.getElementById('sm-project')?.value||'', currentNumber=document.getElementById('sm-number')?.value?.trim()||'';
+  if(!smImportedPayload||!pid) return;
+  if(!smStatusAllowsFinancialData(document.getElementById('sm-status')?.value)){alert(lang==='pt'?'A importação fica disponível somente para SM Aprovada ou Rejeitada.':'Import is available only for Approved or Rejected SMs.');return;}
+  const mappings={}, selects=[...document.querySelectorAll('#sm-import-preview select[data-sm-import-group]')];
+  for(const select of selects){
+    const group=smImportedPayload.groups[Number(select.dataset.smImportGroup)], executor=String(select.value||'').trim();
+    if(!group||!executor){ alert(lang==='pt'?'Vincule todos os executores extraídos antes de aplicar.':'Map every extracted executor before applying.'); return; }
+    mappings[group.sourceExecutor]=executor;
+  }
+  const hasSaved=smHasSavedItems(pid,currentNumber), hasDraft=smDraftItems.size>0;
+  if((hasSaved||hasDraft)&&!confirm(lang==='pt'?(hasSaved?'Esta SM já possui rubricas. Deseja sobrescrever os valores atuais pelos valores desta importação?':'Há valores preenchidos nesta SM. Deseja substituí-los pelos valores desta importação?'):(hasSaved?'This SM already has budget lines. Overwrite them with the imported values?':'This SM already has values. Replace them with imported values?'))) return;
+  const imported=[];
+  for(let groupIndex=0;groupIndex<smImportedPayload.groups.length;groupIndex++){
+    const group=smImportedPayload.groups[groupIndex], executor=mappings[group.sourceExecutor];
+    for(let rowIndex=0;rowIndex<group.rows.length;rowIndex++){
+      const row=group.rows[rowIndex], input=document.querySelector(`#sm-import-preview input[data-sm-import-value="${groupIndex}:${rowIndex}"]`), raw=String(input?.value??row.value).trim(), value=raw===''?0:parseFloat(raw);
+      if(!Number.isFinite(value)||value<0){alert(lang==='pt'?`Revise o valor de ${row.category}.`:`Review the value for ${row.category}.`);return;}
+      imported.push({cat:row.category,executor,valor:value});
+    }
+  }
+  smDraftItems.clear();
+  imported.forEach(row=>smDraftItems.set(smDraftKey(row.cat,row.executor),row));
+  if(editingSMIdx===null) document.getElementById('sm-number').value=smImportedPayload.smNumber;
+  smImportRememberMap(pid,mappings);
+  const firstExecutor=Object.values(mappings)[0]||'';
+  onSMProjectChange();
+  const selector=document.getElementById('sm-executor-filter');
+  if(selector&&firstExecutor){ selector.value=firstExecutor; onSMProjectChange(); }
+  clearSMImportPreview();
 }
 
 function solicitacaoCellFor(header, s){
@@ -6546,14 +6767,27 @@ function openSolModal(type){
   document.getElementById('sol-valor').value='';
   document.getElementById('sol-obs').value='';
   syncSolIncomeUsageFields('');
+  renderSolSMItemsEditor(null);
   document.getElementById('sol-modal').classList.add('show');
   sanitizeVisibleMojibake(document.getElementById('sol-modal'));
 }
 
 // D4: editar uma solicitaÃ§Ã£o existente (qualquer tipo)
+function renderSolSMItemsEditor(s){
+  const container=document.getElementById('sol-sm-items-editor');
+  if(!container) return;
+  if(!s||!/^sm$/i.test(String(s.Tipo||'SM'))){ container.style.display='none'; container.innerHTML=''; return; }
+  const pid=s.Projeto||'', number=s.Numero||s['SM#']||'';
+  const items=(DATA.sms||[]).filter(item=>item.Projeto===pid&&sameSmNumber(item['SM#']||item.Numero_SM||item.Numero,number));
+  container.style.display='block';
+  if(!items.length){ container.innerHTML=`<div class="alert-box alert-amber" style="margin:0;">${lang==='pt'?'Esta SM não possui rubricas cadastradas no painel.':'This SM has no budget lines registered in the panel.'}</div>`; return; }
+  container.innerHTML=`<div class="table-card" style="box-shadow:none;"><div class="table-header"><div class="table-title">${lang==='pt'?'Rubricas cadastradas nesta SM':'Budget lines registered in this SM'}</div></div><div class="table-scroll"><table style="font-size:12px;"><thead><tr><th>ABA</th><th>${lang==='pt'?'Categoria':'Category'}</th><th>${lang==='pt'?'Executor':'Executor'}</th><th class="text-right">${lang==='pt'?'Valor informado':'Registered value'}</th></tr></thead><tbody>${items.map(item=>{const index=DATA.sms.indexOf(item);return `<tr><td class="fw-600 fs-12 color-ink3">${escapeHtml(getCatABA(item.Categoria_despesa)||'-')}</td><td>${escapeHtml(item.Categoria_despesa||'')}</td><td>${escapeHtml(item.Executor|| (lang==='pt'?'Não informado':'Not informed'))}</td><td><input type="number" min="0" step="0.01" class="form-input" data-sol-sm-item="${index}" value="${escapeAttr(item.Valor||0)}" style="min-width:150px;text-align:right;"></td></tr>`;}).join('')}</tbody></table></div></div>`;
+}
+
 function openSolEditModal(idx){
   const s=DATA.solicitacoes[idx];
   if(!s) return;
+  if(/^sm$/i.test(String(s.Tipo||'SM'))){ openSMEditModal(idx); return; }
   editingSolIdx=idx;
   populateSolProjects();
   const L=lang==='pt';
@@ -6573,6 +6807,7 @@ function openSolEditModal(idx){
   document.getElementById('sol-obs').value=s.Observacoes||'';
   const uso=getUsoRendimentoForSM(s.Projeto||'', s.Numero||s['SM#']||'');
   syncSolIncomeUsageFields(uso?uso.Valor_Utilizado:'');
+  renderSolSMItemsEditor(s);
   document.getElementById('sol-modal').classList.add('show');
   sanitizeVisibleMojibake(document.getElementById('sol-modal'));
 }
@@ -6580,55 +6815,27 @@ function openSolEditModal(idx){
 // D3/D4: salvar criaÃ§Ã£o/ediÃ§Ã£o â†’ persiste reescrevendo a sheet Solicitacoes
 async function saveSolModal(){
   const L=lang==='pt';
-  const pid=document.getElementById('sol-projeto').value;
-  const tipo=document.getElementById('sol-tipo').value;
-  const numero=document.getElementById('sol-numero').value.trim();
-  const status=document.getElementById('sol-status').value;
-  const dataSub=document.getElementById('sol-data-sub').value;
-  const dataApr=document.getElementById('sol-data-apr').value;
-  const valor=parseFloat(document.getElementById('sol-valor').value)||0;
-  const obs=document.getElementById('sol-obs').value.trim();
-  const isSM=/^sm$/i.test(tipo);
-  const usoValor=isSM ? (parseFloat(document.getElementById('sol-income-usage')?.value)||0) : 0;
-
-  if(!pid||!numero){ alert(L?'Preencha Projeto e Numero/Codigo.':'Fill in Project and Number/Code.'); return; }
-
-  const novo={
-    Projeto:pid, 'SM#':numero, Numero:numero, Numero_Item:numero, Tipo:tipo,
-    Data_Submissao:dataSub||'', Data_Aprovacao:dataApr||'', Status:status, Observacoes:obs, Valor:valor
-  };
-
-  const oldSol=(editingSolIdx!==null && DATA.solicitacoes[editingSolIdx]) ? DATA.solicitacoes[editingSolIdx] : null;
-  const snapshotSolic=JSON.parse(JSON.stringify(DATA.solicitacoes||[]));
-  const snapshotUso=JSON.parse(JSON.stringify(DATA.uso_rendimento||[]));
-  if(editingSolIdx!==null && DATA.solicitacoes[editingSolIdx]){
-    DATA.solicitacoes[editingSolIdx]=novo;
-  } else {
-    DATA.solicitacoes.push(novo);
-  }
+  const pid=document.getElementById('sol-projeto').value, tipo=document.getElementById('sol-tipo').value, numero=document.getElementById('sol-numero').value.trim(), status=document.getElementById('sol-status').value, dataSub=document.getElementById('sol-data-sub').value, dataApr=document.getElementById('sol-data-apr').value, valor=parseFloat(document.getElementById('sol-valor').value)||0, obs=document.getElementById('sol-obs').value.trim();
+  const isSM=/^sm$/i.test(tipo), usoValor=isSM?(parseFloat(document.getElementById('sol-income-usage')?.value)||0):0;
+  if(!pid||!numero){alert(L?'Preencha Projeto e Numero/Codigo.':'Fill in Project and Number/Code.');return;}
+  const editedItems=isSM?[...document.querySelectorAll('#sol-sm-items-editor input[data-sol-sm-item]')].map(input=>({index:Number(input.dataset.solSmItem),value:parseFloat(input.value)})):[];
+  if(editedItems.some(item=>!Number.isInteger(item.index)||!Number.isFinite(item.value)||item.value<0)){alert(L?'Revise os valores das rubricas da SM.':'Review the SM budget-line values.');return;}
+  const novo={Projeto:pid,'SM#':numero,Numero:numero,Numero_Item:numero,Tipo:tipo,Data_Submissao:dataSub||'',Data_Aprovacao:dataApr||'',Status:status,Observacoes:obs,Valor:valor};
+  const oldSol=(editingSolIdx!==null&&DATA.solicitacoes[editingSolIdx])?DATA.solicitacoes[editingSolIdx]:null;
+  const snapshotSolic=JSON.parse(JSON.stringify(DATA.solicitacoes||[])), snapshotUso=JSON.parse(JSON.stringify(DATA.uso_rendimento||[])), snapshotSms=JSON.parse(JSON.stringify(DATA.sms||[]));
+  if(editingSolIdx!==null&&DATA.solicitacoes[editingSolIdx])DATA.solicitacoes[editingSolIdx]=novo;else DATA.solicitacoes.push(novo);
   if(isSM){
-    const usoRec=usoValor>0 ? {
-      Projeto:pid, Executor:projectExecutorForUso(pid), SM:numero, Numero_SM:numero,
-      Valor_Utilizado:usoValor, Descricao:obs||`Uso de rendimento ${numero}`
-    } : null;
-    replaceUsoRendimentoForSM(oldSol?.Projeto||pid, oldSol?.Numero||oldSol?.['SM#']||numero, usoRec);
+    editedItems.forEach(item=>{const row=DATA.sms[item.index];if(row){row.Projeto=pid;row['SM#']=numero;row.Valor=item.value;}});
+    const usoRec=usoValor>0?{Projeto:pid,Executor:projectExecutorForUso(pid),SM:numero,Numero_SM:numero,Valor_Utilizado:usoValor,Descricao:obs||`Uso de rendimento ${numero}`} : null;
+    replaceUsoRendimentoForSM(oldSol?.Projeto||pid,oldSol?.Numero||oldSol?.['SM#']||numero,usoRec);
   }
-
   showLoading(L?'Salvando registro no Excel...':'Saving record to Excel...');
   try{
     await rewriteSolicitacoesSheet();
-    if(isSM) await rewriteUsoRendimentoSheet();
-    hideLoading();
-    closeModal('sol-modal');
-    editingSolIdx=null;
-    renderCurrentPage();
-    alert(L?'Registro salvo com sucesso!':'Record saved successfully!');
-  }catch(e){
-    DATA.solicitacoes=snapshotSolic;
-    DATA.uso_rendimento=snapshotUso;
-    hideLoading();
-    console.error('saveSolModal error:',e);
-    alert((L?'Erro ao salvar registro: ':'Error saving record: ')+e.message);
+    if(isSM){await rewriteSMItensSheetFromMemory();await rewriteUsoRendimentoSheet();applySMOverrides();}
+    hideLoading();closeModal('sol-modal');editingSolIdx=null;renderCurrentPage();alert(L?'Registro salvo com sucesso!':'Record saved successfully!');
+  }catch(error){
+    DATA.solicitacoes=snapshotSolic;DATA.uso_rendimento=snapshotUso;DATA.sms=snapshotSms;hideLoading();console.error('saveSolModal error:',error);alert((L?'Erro ao salvar registro: ':'Error saving record: ')+(error?.message||error));
   }
 }
 
@@ -6991,8 +7198,10 @@ async function saveNewProject(){
     const planoHeaders=(DATA._headers&&DATA._headers.Plano_Orcamentario&&DATA._headers.Plano_Orcamentario.length)
       ? DATA._headers.Plano_Orcamentario
       : ['Projeto','Executor','Categoria','Codigo_ABA','Valor_PTRB'];
-    for(const linha of novoPlano){
-      await appendExcelRow('Plano_Orcamentario', planoHeaders.map(h=>planoCellFor(h,linha)));
+    // 29/07: mesmo fix do saveSM() - gravar todas as linhas de PTR-B por rubrica num unico PATCH em vez
+    // de um appendExcelRow por rubrica (loop sofria corrida no usedRange do Excel Online).
+    if(novoPlano.length){
+      await appendExcelRows('Plano_Orcamentario', novoPlano.map(linha=>planoHeaders.map(h=>planoCellFor(h,linha))));
     }
     DATA.plano.push(...novoPlano);
     hideLoading();
@@ -7057,227 +7266,151 @@ async function saveGasto(){
 }
 
 // ===================== MODAL: SM =====================
-function openSMModal(pid){
-  const smNum=document.getElementById('sm-number');
-  const smDate=document.getElementById('sm-date-submissao');
-  const smStatus=document.getElementById('sm-status');
-  if(smNum) smNum.value='';
-  if(smDate) smDate.value='';
-  if(smStatus) smStatus.value='Pendente';
-  const incomeEnabled=document.getElementById('sm-income-enabled');
-  const incomeValue=document.getElementById('sm-income-value');
-  if(incomeEnabled) incomeEnabled.checked=false;
-  if(incomeValue) incomeValue.value='';
-  toggleSMIncomeUsage();
-  const sp=document.getElementById('sm-project');
-  if(sp && pid) sp.value=pid;
-  onSMProjectChange();
-  updateSMTotal();
-  document.getElementById('sm-modal').classList.add('show');
-  sanitizeVisibleMojibake(document.getElementById('sm-modal'));
+const SM_MONEY_FULL=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+let smDraftItems=new Map();
+let editingSMIdx=null;
+function smDraftKey(category,executor){ return `${category}|${executor}`; }
+function smStatusAllowsFinancialData(status){ return /^(aprovad|rejeitad)/i.test(String(status||'').trim()); }
+function smStatusNeedsApprovalDate(status){ return smStatusAllowsFinancialData(status); }
+function smNormalizedStatus(status){ return smStatusAllowsFinancialData(status)?String(status).trim():'Em análise'; }
+function toggleSMStatusFields(){
+  const status=document.getElementById('sm-status')?.value||'';
+  const show=smStatusAllowsFinancialData(status);
+  const dateWrap=document.getElementById('sm-date-aprovacao-wrap');
+  const dateLabel=document.getElementById('sm-date-aprovacao-label');
+  const financial=document.getElementById('sm-financial-fields');
+  if(dateWrap) dateWrap.style.display=show?'block':'none';
+  if(dateLabel) dateLabel.textContent=/^rejeitad/i.test(status)?'Data de rejeição':'Data de aprovação';
+  if(financial) financial.style.display=show?'block':'none';
+  if(!show) clearSMImportPreview();
+  if(show) onSMProjectChange();
 }
-
-function smAllAnpCategories(){
-  return (DATA.categorias||[])
-    .map(c=>c.Categoria_despesa_PT||c.Categoria_despesa_ENG)
-    .filter(Boolean)
-    .sort(catCompare);
-}
-
-function smCategoryRowHtml(pid, cat, isNew=false){
-  const planoRows=(DATA.plano||[]).filter(r=>r.Projeto===pid && r.Categoria_despesa===cat);
-  const catRef=(DATA.categorias||[]).find(c=>c.Categoria_despesa_PT===cat||c.Categoria_despesa_ENG===cat)||{};
-  const aba=(planoRows.find(r=>r.Codigo_ABA)||{}).Codigo_ABA || catRef.ABA || catRef.Codigo_ABA || getCatABA(cat) || 'Ã¢â‚¬â€';
-  const ptrb=planoRows.reduce((s,r)=>s+parseFloat(r['Plano_PTR-B']||0),0);
-  const plan=planoRows.reduce((s,r)=>s+parseFloat(r.Plano_Atual||0),0);
-  return `<tr data-cat-row="${escapeAttr(cat)}" data-new-cat="${isNew?'1':'0'}">
-    <td>${escapeHtml(cat)}${isNew?` <span class="badge badge-amber" style="font-size:10px;">${lang==='pt'?'Nova':'New'}</span>`:''}</td>
-    <td class="fs-12 color-ink3">${escapeHtml(aba)}</td>
-    <td class="text-right">${FMTK(ptrb)}</td>
-    <td class="text-right fw-600">${FMTK(plan)}</td>
-    <td><input type="number" class="form-input" step="0.01" placeholder="${EMPTY}" data-cat="${escapeAttr(cat)}" data-new-cat="${isNew?'1':'0'}" oninput="updateSMTotal()" style="min-width:120px;text-align:right;"></td>
-  </tr>`;
-}
-
-function refreshSMAddCategoryOptions(){
-  const sel=document.getElementById('sm-add-cat-select');
-  if(!sel) return;
-  const used=[...document.querySelectorAll('#sm-categories-table input[data-cat]')].map(i=>i.dataset.cat);
-  const missing=smAllAnpCategories().filter(cat=>!used.includes(cat));
-  sel.innerHTML=missing.map(cat=>`<option value="${escapeAttr(cat)}">${escapeHtml(cat)} (${escapeHtml(getCatABA(cat)||'')})</option>`).join('');
-  const btn=document.getElementById('sm-add-cat-btn');
-  if(btn) btn.disabled=!missing.length;
-}
-
-function addSMCategoryRow(){
-  const pid=document.getElementById('sm-project')?.value||'';
-  const sel=document.getElementById('sm-add-cat-select');
-  const tbody=document.getElementById('sm-cat-tbody');
-  const cat=sel?.value||'';
-  if(!pid||!cat||!tbody) return;
-  const exists=[...document.querySelectorAll('#sm-categories-table input[data-cat]')].some(input=>input.dataset.cat===cat);
-  if(exists) return;
-  if(!document.querySelector('#sm-categories-table input[data-cat]')) tbody.innerHTML='';
-  tbody.insertAdjacentHTML('beforeend', smCategoryRowHtml(pid,cat,true));
-  refreshSMAddCategoryOptions();
-  updateSMTotal();
-}
-
-function onSMProjectChange(){
-  const pid=document.getElementById('sm-project')?.value||'';
-  const table=document.getElementById('sm-categories-table');
-  if(!table) return;
-
-  const planoRows=(DATA.plano||[]).filter(r=>r.Projeto===pid);
-  const cats=[...new Set(planoRows.map(r=>r.Categoria_despesa).filter(Boolean))].sort(catCompare);
+function smProjectChanged(){ smDraftItems.clear(); clearSMImportPreview(); onSMProjectChange(); }
+function smProjectExecutors(pid){
   const executors=rubProjectExecutors(pid);
-  const execOptions=executors.map(e=>`<option value="${escapeAttr(e)}">${escapeHtml(e)}</option>`).join('');
-  const newCatExecutor=executors.length>1
-    ? `<div class="form-group" style="min-width:180px;margin:0;">
-        <label class="form-label" style="font-size:11px;">${lang==='pt'?'Executor das novas rubricas':'Executor for new categories'}</label>
-        <select class="form-select" id="sm-new-cat-executor">${execOptions}</select>
-      </div>`
-    : `<input type="hidden" id="sm-new-cat-executor" value="${escapeAttr(executors[0]||'')}">`;
-
-  table.innerHTML=`
-    <div style="display:flex;gap:8px;align-items:flex-end;padding:10px;background:var(--surface2);border-bottom:1px solid var(--border);">
-      <div class="form-group" style="flex:1;margin:0;">
-        <label class="form-label" style="font-size:11px;">${lang==='pt'?'Adicionar rubrica ANP existente':'Add existing ANP category'}</label>
-        <select class="form-select" id="sm-add-cat-select"></select>
-      </div>
-      ${newCatExecutor}
-      <button type="button" class="btn btn-secondary btn-sm" id="sm-add-cat-btn" onclick="addSMCategoryRow()">${lang==='pt'?'Adicionar':'Add'}</button>
-    </div>
-    <div class="table-scroll"><table style="font-size:12px;">
-      <thead><tr>
-        <th>${lang==='pt'?'Categoria':'Category'}</th>
-        <th>CÃƒÂ³d. ABA</th>
-        <th class="text-right">PTR-B Atual</th>
-        <th class="text-right">Plano Atual</th>
-        <th class="text-right">Novo Valor</th>
-      </tr></thead>
-      <tbody id="sm-cat-tbody">
-        ${cats.map(cat=>smCategoryRowHtml(pid,cat,false)).join('') || `<tr><td colspan="5" class="empty-state">${lang==='pt'?'Nenhuma rubrica no projeto. Adicione uma categoria ANP acima.':'No project categories. Add an ANP category above.'}</td></tr>`}
-      </tbody>
-    </table></div>`;
-  refreshSMAddCategoryOptions();
+  if(executors.length) return executors;
+  const project=(DATA.projetos||[]).find(row=>row.Projeto===pid);
+  return project?.Executor?[String(project.Executor).trim()]:[];
 }
-
+function smSelectedExecutor(pid){ return String(document.getElementById('sm-executor-filter')?.value||'').trim()||smProjectExecutors(pid)[0]||''; }
+function captureSMVisibleDraft(){
+  if(!smStatusAllowsFinancialData(document.getElementById('sm-status')?.value)) return;
+  const pid=document.getElementById('sm-project')?.value||'', executor=smSelectedExecutor(pid);
+  if(!executor) return;
+  document.querySelectorAll('#sm-categories-table input[data-cat]').forEach(input=>{
+    const category=input.dataset.cat||'', key=smDraftKey(category,executor), raw=String(input.value||'').trim();
+    if(!raw){ smDraftItems.delete(key); return; }
+    const value=parseFloat(raw); if(Number.isFinite(value)&&value>=0) smDraftItems.set(key,{cat:category,executor,valor:value});
+  });
+}
+function smExecutorChanged(){ captureSMVisibleDraft(); onSMProjectChange(); }
+function resetSMModalIdentity(){
+  const project=document.getElementById('sm-project'), number=document.getElementById('sm-number');
+  if(project) project.disabled=false;
+  if(number) number.disabled=false;
+}
+function openSMModal(pid){
+  editingSMIdx=null; resetSMModalIdentity(); smDraftItems.clear(); clearSMImportPreview();
+  ['sm-number','sm-date-submissao','sm-date-aprovacao','sm-income-value'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  const status=document.getElementById('sm-status'); if(status)status.value='Em análise';
+  const income=document.getElementById('sm-income-enabled'); if(income)income.checked=false;
+  const title=document.getElementById('modal-sm-title'); if(title)title.textContent='Nova Solicitação de Mudança (SM)';
+  const project=document.getElementById('sm-project'); if(project&&pid)project.value=pid;
+  toggleSMIncomeUsage(); toggleSMStatusFields(); onSMProjectChange(); updateSMTotal(); document.getElementById('sm-modal').classList.add('show'); sanitizeVisibleMojibake(document.getElementById('sm-modal'));
+}
+function openSMEditModal(idx){
+  const s=DATA.solicitacoes[idx]; if(!s) return;
+  editingSMIdx=idx; smDraftItems.clear(); clearSMImportPreview();
+  const pid=s.Projeto||'', number=s.Numero||s['SM#']||'';
+  const project=document.getElementById('sm-project'), numberInput=document.getElementById('sm-number');
+  if(project){project.value=pid;project.disabled=true;}
+  if(numberInput){numberInput.value=number;numberInput.disabled=true;}
+  document.getElementById('sm-date-submissao').value=String(s.Data_Submissao||'').split('T')[0];
+  document.getElementById('sm-date-aprovacao').value=String(s.Data_Aprovacao||'').split('T')[0];
+  const status=document.getElementById('sm-status'); if(status)status.value=smNormalizedStatus(s.Status);
+  (DATA.sms||[]).filter(row=>row.Projeto===pid&&sameSmNumber(row['SM#']||row.Numero_SM||row.Numero,number)).forEach(row=>{
+    const executor=String(row.Executor||'').trim()||smProjectExecutors(pid)[0]||'';
+    if(executor)smDraftItems.set(smDraftKey(row.Categoria_despesa,executor),{cat:row.Categoria_despesa,executor,valor:parseFloat(row.Valor||0)||0});
+  });
+  const uso=getUsoRendimentoForSM(pid,number), income=document.getElementById('sm-income-enabled');
+  if(income)income.checked=!!uso;
+  document.getElementById('sm-income-value').value=uso?(parseFloat(uso.Valor_Utilizado||0)||''):'';
+  const title=document.getElementById('modal-sm-title'); if(title)title.textContent='Editar Solicitação de Mudança (SM)';
+  toggleSMIncomeUsage(); toggleSMStatusFields(); onSMProjectChange(); updateSMTotal(); document.getElementById('sm-modal').classList.add('show'); sanitizeVisibleMojibake(document.getElementById('sm-modal'));
+}
+function smAllAnpCategories(){ return (DATA.categorias||[]).map(c=>c.Categoria_despesa_PT||c.Categoria_despesa_ENG).filter(Boolean).sort(catCompare); }
+function smCategoryRowHtml(pid,category,isNew=false){
+  const executor=smSelectedExecutor(pid);
+  const planRows=(DATA.plano||[]).filter(row=>row.Projeto===pid&&row.Categoria_despesa===category&&(!executor||row.Executor===executor));
+  const catRef=(DATA.categorias||[]).find(row=>row.Categoria_despesa_PT===category||row.Categoria_despesa_ENG===category)||{};
+  const aba=(planRows.find(row=>row.Codigo_ABA)||{}).Codigo_ABA||catRef.ABA||catRef.Codigo_ABA||getCatABA(category)||'-';
+  const ptrb=planRows.reduce((sum,row)=>sum+(parseFloat(row['Plano_PTR-B']||0)||0),0);
+  const plan=(currentPlanMap(pid,executor||'ALL')||{})[category]||0;
+  const draft=smDraftItems.get(smDraftKey(category,executor)), value=draft?draft.valor:'';
+  return `<tr data-cat-row="${escapeAttr(category)}"><td class="fw-600 fs-12 color-ink3">${escapeHtml(aba)}</td><td title="${escapeAttr(category)}">${escapeHtml(category)}${isNew?` <span class="badge badge-amber" style="font-size:10px;">${lang==='pt'?'Nova':'New'}</span>`:''}</td><td class="text-right">${SM_MONEY_FULL.format(ptrb)}</td><td class="text-right fw-600">${SM_MONEY_FULL.format(plan)}</td><td><input type="number" class="form-input" step="0.01" min="0" placeholder="-" data-cat="${escapeAttr(category)}" value="${value===''?'':escapeAttr(value)}" oninput="updateSMTotal()" style="min-width:150px;text-align:right;"></td></tr>`;
+}
+function refreshSMAddCategoryOptions(){
+  const select=document.getElementById('sm-add-cat-select'); if(!select)return;
+  const used=[...document.querySelectorAll('#sm-categories-table input[data-cat]')].map(input=>input.dataset.cat);
+  const missing=smAllAnpCategories().filter(category=>!used.includes(category));
+  select.innerHTML=missing.map(category=>`<option value="${escapeAttr(category)}">${escapeHtml(getCatABA(category)||'')} · ${escapeHtml(category)}</option>`).join('');
+  const button=document.getElementById('sm-add-cat-btn'); if(button)button.disabled=!missing.length;
+}
+function addSMCategoryRow(){
+  captureSMVisibleDraft(); const pid=document.getElementById('sm-project')?.value||'', select=document.getElementById('sm-add-cat-select'), tbody=document.getElementById('sm-cat-tbody'), category=select?.value||'';
+  if(!pid||!category||!tbody||[...tbody.querySelectorAll('input[data-cat]')].some(input=>input.dataset.cat===category))return;
+  tbody.insertAdjacentHTML('beforeend',smCategoryRowHtml(pid,category,true)); refreshSMAddCategoryOptions();
+}
+function onSMProjectChange(){
+  const pid=document.getElementById('sm-project')?.value||'', table=document.getElementById('sm-categories-table'); if(!table)return;
+  const selector=document.getElementById('sm-executor-filter'), wrap=document.getElementById('sm-executor-filter-wrap'), previous=selector?.value||'', executors=smProjectExecutors(pid);
+  if(selector){selector.innerHTML=executors.map(executor=>`<option value="${escapeAttr(executor)}">${escapeHtml(executor)}</option>`).join('');if(executors.includes(previous))selector.value=previous;}
+  if(wrap)wrap.style.display=executors.length>1?'block':'none';
+  const executor=smSelectedExecutor(pid), note=document.getElementById('sm-income-executor-note');
+  if(note){note.style.display=executor?'block':'none';note.textContent=executor?`Executor selecionado: ${executor}`:'';}
+  const planRows=(DATA.plano||[]).filter(row=>row.Projeto===pid&&(!executor||row.Executor===executor));
+  const savedCategories=(DATA.sms||[]).filter(row=>row.Projeto===pid).map(row=>row.Categoria_despesa);
+  const draftCategories=[...smDraftItems.values()].filter(row=>row.executor===executor).map(row=>row.cat);
+  const categories=[...new Set([...planRows.map(row=>row.Categoria_despesa),...savedCategories,...draftCategories].filter(Boolean))].sort(catCompare);
+  const label=document.getElementById('sm-plan-caption');if(label)label.textContent=executor?`Novo valor das rubricas alteradas para ${executor}.`:'Selecione um executor para informar os valores.';
+  table.innerHTML=`<div class="table-scroll" style="max-height:420px;"><table style="font-size:12px;"><thead><tr><th style="width:70px;">ABA</th><th>Categoria</th><th class="text-right">PTR-B</th><th class="text-right">Plano Atual${latestSMLabel(pid)?` (${latestSMLabel(pid)})`:''}</th><th class="text-right">Novo valor da SM</th></tr></thead><tbody id="sm-cat-tbody">${categories.map(category=>smCategoryRowHtml(pid,category,false)).join('')||`<tr><td colspan="5" class="empty-state">${lang==='pt'?'Nenhuma rubrica para o executor selecionado.':'No categories for the selected executor.'}</td></tr>`}</tbody></table></div>`;
+  refreshSMAddCategoryOptions(); updateSMTotal();
+}
 function updateSMTotal(){
-  const inputs=document.querySelectorAll('#sm-categories-table input[data-cat]');
-  let total=0;
-  inputs.forEach(inp=>{
-    const v=parseFloat(inp.value);
-    if(v>0) total+=v;
-  });
-  const el=document.getElementById('sm-total-display');
-  if(el) el.textContent=FMT.format(total);
+  let total=0;document.querySelectorAll('#sm-categories-table input[data-cat]').forEach(input=>{const value=parseFloat(input.value);if(Number.isFinite(value)&&value>0)total+=value;});
+  const el=document.getElementById('sm-total-display');if(el)el.textContent=SM_MONEY_FULL.format(total);
 }
-
+function smHasSavedItems(pid,number){ return (DATA.sms||[]).some(row=>row.Projeto===pid&&sameSmNumber(row['SM#']||row.Numero_SM||row.Numero,number)); }
 async function saveSM(){
-  const pid = document.getElementById('sm-project').value;
-  const smNum = document.getElementById('sm-number').value.trim();
-  const dataSubmissao = document.getElementById('sm-date-submissao').value;
-  const status = document.getElementById('sm-status').value;
-  const useIncome = !!document.getElementById('sm-income-enabled')?.checked;
-  const incomeValue = useIncome ? (parseFloat(document.getElementById('sm-income-value')?.value)||0) : 0;
-
-  if(!pid || !smNum){ alert('Preencha Projeto e Numero da SM.'); return; }
-  if(useIncome && incomeValue<=0){ alert('Informe o valor do rendimento utilizado.'); return; }
-
-  const inputs = document.querySelectorAll('#sm-categories-table input[data-cat]');
-  const linhas = [];
-  inputs.forEach(inp => {
-    const v = parseFloat(inp.value);
-    if(v > 0) linhas.push({ cat: inp.dataset.cat, valor: v });
-  });
-
-  if(!linhas.length){ alert('Informe ao menos um valor.'); return; }
-
-  const missingCats=[...new Set(linhas
-    .map(l=>l.cat)
-    .filter(cat=>!(DATA.plano||[]).some(r=>r.Projeto===pid && r.Categoria_despesa===cat)))];
-  const newCatExecutor=document.getElementById('sm-new-cat-executor')?.value || rubResolveExecutor(pid,'ALL');
-  if(missingCats.length && !newCatExecutor){
-    alert(lang==='pt'?'Informe o executor das novas rubricas.':'Select the executor for the new categories.');
-    return;
-  }
-  const newPlanoRows=missingCats.map(cat=>({
-    Projeto:pid,
-    Executor:newCatExecutor,
-    Categoria_despesa:cat,
-    Categoria:cat,
-    Codigo_ABA:getCatABA(cat)||'',
-    'Plano_PTR-B':0,
-    Valor_PTRB:0,
-    Plano_Atual:0,
-  }));
-  const usoRec=incomeValue>0 ? {
-    Projeto:pid, Executor:projectExecutorForUso(pid), SM:smNum, Numero_SM:smNum,
-    Valor_Utilizado:incomeValue, Descricao:`Uso de rendimento ${smNum}`
-  } : null;
-  const snapshot={
-    plano:JSON.parse(JSON.stringify(DATA.plano||[])),
-    solicitacoes:JSON.parse(JSON.stringify(DATA.solicitacoes||[])),
-    sms:JSON.parse(JSON.stringify(DATA.sms||[])),
-    uso_rendimento:JSON.parse(JSON.stringify(DATA.uso_rendimento||[])),
-  };
-
-  showLoading('Saving SM...');
-  try {
-    const planoHeaders=(DATA._headers&&DATA._headers.Plano_Orcamentario&&DATA._headers.Plano_Orcamentario.length)
-      ? DATA._headers.Plano_Orcamentario
-      : ['Projeto','Executor','Categoria','Codigo_ABA','Valor_PTRB'];
-    for(const row of newPlanoRows){
-      await appendExcelRow('Plano_Orcamentario', planoHeaders.map(h=>planoCellFor(h,row)));
-      DATA.plano.push(row);
+  const pid=document.getElementById('sm-project').value,smNum=document.getElementById('sm-number').value.trim(),dataSubmissao=document.getElementById('sm-date-submissao').value,status=smNormalizedStatus(document.getElementById('sm-status').value),dataAprovacao=document.getElementById('sm-date-aprovacao').value,isFinal=smStatusAllowsFinancialData(status);
+  if(!pid||!smNum){alert('Preencha Projeto e Numero da SM.');return;}
+  const oldSol=(editingSMIdx!==null&&DATA.solicitacoes[editingSMIdx])?DATA.solicitacoes[editingSMIdx]:null;
+  const oldPid=oldSol?.Projeto||pid,oldNumber=oldSol?.Numero||oldSol?.['SM#']||smNum;
+  if(!isFinal&&oldSol&&smHasSavedItems(oldPid,oldNumber)){alert(lang==='pt'?'Esta SM já possui rubricas. Para preservar o histórico financeiro, mantenha-a como Aprovada ou Rejeitada.':'This SM already has budget lines. Keep it Approved or Rejected to preserve financial history.');return;}
+  if(isFinal){captureSMVisibleDraft();if(!dataAprovacao){alert(lang==='pt'?'Informe a data de aprovação/rejeição.':'Enter the approval/rejection date.');return;}}
+  const useIncome=isFinal&&!!document.getElementById('sm-income-enabled')?.checked,incomeValue=useIncome?(parseFloat(document.getElementById('sm-income-value')?.value)||0):0,linhas=isFinal?[...smDraftItems.values()]:[];
+  if(useIncome&&incomeValue<=0){alert('Informe o valor do rendimento utilizado.');return;}
+  if(isFinal&&!linhas.length){alert(lang==='pt'?'Informe ou importe ao menos uma rubrica final.':'Enter or import at least one final budget line.');return;}
+  const smItensHeaders=(DATA._headers&&DATA._headers.SM_Itens&&DATA._headers.SM_Itens.length)?DATA._headers.SM_Itens:['Projeto','Numero_SM','Categoria','Valor','Executor'];
+  if(isFinal&&!smItensHeaders.some(header=>normLooseText(header).replace(/[ _]/g,'').toLowerCase()==='executor')){alert(lang==='pt'?'A base ainda não possui a coluna Executor na aba SM_Itens. Atualize a base antes de salvar uma SM.':'The workbook still needs the Executor column in SM_Itens before saving a change request.');return;}
+  const existingPlanPairs=new Set((DATA.plano||[]).filter(row=>row.Projeto===pid).map(row=>smDraftKey(row.Categoria_despesa,String(row.Executor||'').trim()))),createdPlanPairs=new Set(),newPlanoRows=[];
+  linhas.forEach(linha=>{const key=smDraftKey(linha.cat,linha.executor);if(!existingPlanPairs.has(key)&&!createdPlanPairs.has(key)){createdPlanPairs.add(key);newPlanoRows.push({Projeto:pid,Executor:linha.executor,Categoria_despesa:linha.cat,Categoria:linha.cat,Codigo_ABA:getCatABA(linha.cat)||'','Plano_PTR-B':0,Valor_PTRB:0,Plano_Atual:0});}});
+  const incomeExecutor=smSelectedExecutor(pid);if(useIncome&&!incomeExecutor){alert(lang==='pt'?'Selecione o executor do rendimento utilizado.':'Select the executor for the income usage.');return;}
+  const usoRec=incomeValue>0?{Projeto:pid,Executor:incomeExecutor,SM:smNum,Numero_SM:smNum,Valor_Utilizado:incomeValue,Descricao:`Uso de rendimento ${smNum}`} : null;
+  const solicitation={Projeto:pid,'SM#':smNum,Numero:smNum,Numero_Item:smNum,Tipo:'SM',Data_Submissao:dataSubmissao,Data_Aprovacao:isFinal?dataAprovacao:'',Status:status,Observacoes:oldSol?.Observacoes||'',Valor:0};
+  const smRows=linhas.map(linha=>({Projeto:pid,'SM#':smNum,Executor:linha.executor,Categoria_despesa:linha.cat,Valor:linha.valor}));
+  const snapshot={plano:JSON.parse(JSON.stringify(DATA.plano||[])),solicitacoes:JSON.parse(JSON.stringify(DATA.solicitacoes||[])),sms:JSON.parse(JSON.stringify(DATA.sms||[])),uso_rendimento:JSON.parse(JSON.stringify(DATA.uso_rendimento||[]))};showLoading('Saving SM...');
+  try{
+    const planoHeaders=(DATA._headers&&DATA._headers.Plano_Orcamentario&&DATA._headers.Plano_Orcamentario.length)?DATA._headers.Plano_Orcamentario:['Projeto','Executor','Categoria','Codigo_ABA','Valor_PTRB'];
+    if(newPlanoRows.length){await appendExcelRows('Plano_Orcamentario',newPlanoRows.map(row=>planoHeaders.map(header=>planoCellFor(header,row))));newPlanoRows.forEach(row=>DATA.plano.push(row));}
+    if(oldSol){DATA.solicitacoes[editingSMIdx]=solicitation;await rewriteSolicitacoesSheet();}
+    else {const solicitacoesHeaders=(DATA._headers&&DATA._headers.Solicitacoes&&DATA._headers.Solicitacoes.length)?DATA._headers.Solicitacoes:['Projeto','Numero_Item','Tipo','Data_Submissao','Data_Aprovacao','Status','Valor'];await appendExcelRow('Solicitacoes',solicitacoesHeaders.map(header=>solicitacaoCellFor(header,solicitation)));DATA.solicitacoes.push(solicitation);}
+    if(isFinal){
+      if(oldSol){DATA.sms=DATA.sms.filter(row=>!(row.Projeto===oldPid&&sameSmNumber(row['SM#']||row.Numero_SM||row.Numero,oldNumber)));DATA.sms.push(...smRows);replaceUsoRendimentoForSM(oldPid,oldNumber,usoRec);await rewriteSMItensSheetFromMemory();await rewriteUsoRendimentoSheet();}
+      else {await appendExcelRows('SM_Itens',smRows.map(row=>smItensHeaders.map(header=>smItemCellFor(header,row))));DATA.sms.push(...smRows);if(usoRec){const usoHeaders=(DATA._headers&&DATA._headers.Uso_Rendimento&&DATA._headers.Uso_Rendimento.length)?DATA._headers.Uso_Rendimento:['Projeto','Executor','Numero_SM','Valor_Utilizado','Descricao'];await appendExcelRow('Uso_Rendimento',usoHeaders.map(header=>usoRendimentoCellFor(header,usoRec)));DATA.uso_rendimento.push(usoRec);}}
     }
-
-    await appendExcelRow('Solicitacoes', [
-      pid, smNum, 'SM',
-      isoToExcelSerial(dataSubmissao) || '',
-      '',
-      status, ''
-    ]);
-    DATA.solicitacoes.push({
-      Projeto: pid, 'SM#': smNum, Numero: smNum, Tipo: 'SM',
-      Data_Submissao: dataSubmissao, Data_Aprovacao: '', Status: status, Observacoes: '', Valor: 0
-    });
-
-    // 29/07: SM_Itens agora grava pelos headers reais (smItemCellFor/DATA._headers), como as demais
-    // sheets desta funcao. Antes o append era por posicao fixa [Projeto,SM#,Categoria,Valor], que
-    // corrompe a linha se a planilha tiver a ordem/colunas diferente da assumida.
-    const smItensHeaders=(DATA._headers&&DATA._headers.SM_Itens&&DATA._headers.SM_Itens.length)
-      ? DATA._headers.SM_Itens
-      : ['Projeto','Numero_SM','Categoria','Valor'];
-    for(const linha of linhas){
-      const smRow={ Projeto: pid, 'SM#': smNum, Categoria_despesa: linha.cat, Valor: linha.valor };
-      await appendExcelRow('SM_Itens', smItensHeaders.map(h=>smItemCellFor(h,smRow)));
-      DATA.sms.push(smRow);
-    }
-
-    if(usoRec){
-      const usoHeaders=(DATA._headers&&DATA._headers.Uso_Rendimento&&DATA._headers.Uso_Rendimento.length)
-        ? DATA._headers.Uso_Rendimento
-        : ['Projeto','Executor','Numero_SM','Valor_Utilizado','Descricao'];
-      await appendExcelRow('Uso_Rendimento', usoHeaders.map(h=>usoRendimentoCellFor(h,usoRec)));
-      DATA.uso_rendimento.push(usoRec);
-    }
-
-    applySMOverrides();
-    closeModal('sm-modal');
-    hideLoading();
-    renderCurrentPage();
-    alert('SM saved successfully!');
-  } catch(e) {
-    // Excel appends before a failure can remain in the workbook; rollback keeps the UI memory consistent.
-    DATA.plano=snapshot.plano;
-    DATA.solicitacoes=snapshot.solicitacoes;
-    DATA.sms=snapshot.sms;
-    DATA.uso_rendimento=snapshot.uso_rendimento;
-    hideLoading();
-    alert('Error saving SM: ' + e.message);
-  }
+    applySMOverrides();smDraftItems.clear();editingSMIdx=null;resetSMModalIdentity();closeModal('sm-modal');hideLoading();renderCurrentPage();alert(lang==='pt'?'SM salva com sucesso!':'SM saved successfully!');
+  }catch(error){DATA.plano=snapshot.plano;DATA.solicitacoes=snapshot.solicitacoes;DATA.sms=snapshot.sms;DATA.uso_rendimento=snapshot.uso_rendimento;hideLoading();alert((lang==='pt'?'Erro ao salvar SM: ':'Error saving SM: ')+(error?.message||error));}
 }
 
 // ===================== INIT =====================
