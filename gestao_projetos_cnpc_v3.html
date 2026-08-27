@@ -5058,7 +5058,7 @@ function rubApplyChange(proj, cat, month, exec, newVal){
     if(g.Executor!==executor) return true;
     return false;
   });
-  if(newVal>0){
+  if(Math.abs(newVal) > 0.005){
     DATA.gastos.push({Projetos:proj,Executor:executor,Ano:year,MÃªs:monthName,
       Data:`${year}-${mo}-01`,Categoria_despesa:cat,Valor:newVal});
   }
