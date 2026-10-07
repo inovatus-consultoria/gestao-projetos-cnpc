@@ -6222,7 +6222,10 @@ async function gerarRelatorio(mesAno, projetosIncluidos){
     styles:{default:{document:{run:{font:'Calibri',size:22}},heading1:{run:{font:'Calibri',size:28,bold:true},paragraph:{spacing:{before:240,after:200,line:360},outlineLevel:0}},heading2:{run:{font:'Calibri',size:26,bold:true},paragraph:{spacing:{before:200,after:160,line:360},outlineLevel:1}},heading3:{run:{font:'Calibri',size:22,bold:true},paragraph:{spacing:{before:160,after:80,line:360},outlineLevel:2}}}},
     sections:[{...portrait,properties:{...portrait.properties,type:undefined},children:_rptCoverChildren(d,mesAno,'Ricardo Nazareth','Yiannis Chanis')},{...portrait,children:[...toc,...exec]},{...landscape,children:_rptPortfolioChildren(d,projetos,tableCounter)},{...portrait,children:projectChildren}]
   });
-  const blob=await d.Packer.toBlob(doc),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`Inovatus-Monthly-Report-${mesAno.replace(/\s+/g,'-')}.docx`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},2000);
+  const monthNames=['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+  const dateMatch=String(mesAno).match(/([A-Za-z]+)\s+(\d{4})/),monthIndex=dateMatch?new Date(`${dateMatch[1]} 1, 2000`).getMonth():0,shortYear=dateMatch?dateMatch[2].slice(-2):'';
+  const reportFileMonth=(monthNames[monthIndex]||'XXX')+shortYear;
+  const blob=await d.Packer.toBlob(doc),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`GEN-RTXX-MonthlyReport_${reportFileMonth}-V0.docx`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},2000);
 }
 
 
