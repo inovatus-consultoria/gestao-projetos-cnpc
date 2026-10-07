@@ -5925,7 +5925,7 @@ function _rptHeader(d, mesAno, refCode, totalW=9026){
   const run=(text,bold=false)=>new d.TextRun({text,bold,size:22,font:'Calibri',color:'000000'});
   const cell=(children,w,shade,verticalAlign)=>new d.TableCell({width:{size:w,type:d.WidthType.DXA},borders,shading:shade?{fill:shade,type:d.ShadingType.CLEAR}:undefined,verticalAlign:verticalAlign||d.VerticalAlign.CENTER,margins:{top:80,bottom:80,left:100,right:100},children});
   const table=new d.Table({width:{size:totalW,type:d.WidthType.DXA},columnWidths:[leftW,rightW],rows:[new d.TableRow({children:[
-    cell([p([run('CNPC Brasil',true)]),p([run('CNPC Brasil Monthly Report - '+mesAno)],d.AlignmentType.CENTER)],leftW),
+    cell([p([run('CNPC Brasil',true)]),p([run('Monthly Report - '+mesAno)],d.AlignmentType.CENTER)],leftW),
     cell([p([run('Reference: ',true)]),p([run('Revision: ',true),run('0')]),p([run('Date: ',true),run(_rptDateToday())]),p([
       new d.TextRun({children:[d.PageNumber.CURRENT],bold:true,size:22,font:'Calibri',color:'000000'}),
       run(' of ',true),
