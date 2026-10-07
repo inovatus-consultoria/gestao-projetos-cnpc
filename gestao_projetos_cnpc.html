@@ -5923,10 +5923,10 @@ function _rptHeader(d, mesAno, refCode, totalW=9026){
   const b={style:d.BorderStyle.SINGLE,size:2,color:'B7B7B7'},borders={top:b,bottom:b,left:b,right:b};
   const p=(runs,align)=>new d.Paragraph({children:runs,alignment:align||d.AlignmentType.LEFT,spacing:{before:0,after:0,line:280}});
   const run=(text,bold=false)=>new d.TextRun({text,bold,size:22,font:'Calibri',color:'000000'});
-  const cell=(children,w,shade)=>new d.TableCell({width:{size:w,type:d.WidthType.DXA},borders,shading:shade?{fill:shade,type:d.ShadingType.CLEAR}:undefined,margins:{top:80,bottom:80,left:100,right:100},children});
+  const cell=(children,w,shade,verticalAlign)=>new d.TableCell({width:{size:w,type:d.WidthType.DXA},borders,shading:shade?{fill:shade,type:d.ShadingType.CLEAR}:undefined,verticalAlign:verticalAlign||d.VerticalAlign.CENTER,margins:{top:80,bottom:80,left:100,right:100},children});
   const table=new d.Table({width:{size:totalW,type:d.WidthType.DXA},columnWidths:[leftW,rightW],rows:[new d.TableRow({children:[
-    cell([p([run('CNPC Brasil',true)]),p([run('CNPC Brasil Monthly Report - '+mesAno)])],leftW),
-    cell([p([run('Reference: ',true),run(refCode)]),p([run('Revision: ',true),run('0')]),p([run('Date: ',true),run(_rptDateToday())]),p([
+    cell([p([run('CNPC Brasil',true)]),p([run('CNPC Brasil Monthly Report - '+mesAno)],d.AlignmentType.CENTER)],leftW),
+    cell([p([run('Reference: ',true)]),p([run('Revision: ',true),run('0')]),p([run('Date: ',true),run(_rptDateToday())]),p([
       new d.TextRun({children:[d.PageNumber.CURRENT],bold:true,size:22,font:'Calibri',color:'000000'}),
       run(' of ',true),
       new d.TextRun({children:[d.PageNumber.TOTAL_PAGES],bold:true,size:22,font:'Calibri',color:'000000'})
@@ -5950,16 +5950,16 @@ function _rptFooter(d,totalW=9026){
 function _rptCoverChildren(d, mesAno, preparedBy, authorisedBy){
   const totalW=9026,colW=Math.floor(totalW/2),none={style:d.BorderStyle.NONE,size:0,color:'FFFFFF'},noBorders={top:none,bottom:none,left:none,right:none};
   const logos=new d.Table({width:{size:totalW,type:d.WidthType.DXA},columnWidths:[colW,totalW-colW],rows:[new d.TableRow({children:[
-    new d.TableCell({width:{size:colW,type:d.WidthType.DXA},borders:noBorders,children:[new d.Paragraph({alignment:d.AlignmentType.CENTER,children:[new d.ImageRun({data:_b64toUint8(RPT_LOGO_KAROON),transformation:{width:178,height:75},type:'png'})]})]}),
+    new d.TableCell({width:{size:colW,type:d.WidthType.DXA},borders:noBorders,children:[new d.Paragraph({alignment:d.AlignmentType.CENTER,children:[new d.ImageRun({data:_b64toUint8(RPT_LOGO_KAROON),transformation:{width:140,height:74},type:'png'})]})]}),
     new d.TableCell({width:{size:totalW-colW,type:d.WidthType.DXA},borders:noBorders,children:[new d.Paragraph({alignment:d.AlignmentType.CENTER,children:[new d.ImageRun({data:_b64toUint8(RPT_LOGO_INOVATUS),transformation:{width:300,height:69},type:'png'})]})]})
   ]})]});
   const thin={style:d.BorderStyle.SINGLE,size:2,color:'AAAAAA'},borders={top:thin,bottom:thin,left:thin,right:thin};
-  const widths=[1100,1600,2500,totalW-5200];
+  const widths=[1100,1600,totalW-2700];
   const cell=(text,w,head=false)=>new d.TableCell({width:{size:w,type:d.WidthType.DXA},borders,shading:head?{fill:'F2F2F2',type:d.ShadingType.CLEAR}:undefined,margins:{top:70,bottom:70,left:90,right:90},children:[new d.Paragraph({children:[new d.TextRun({text:String(text||''),bold:head,size:18,font:'Calibri'})],spacing:{before:0,after:0}})]});
   const row=(vals,head=false)=>new d.TableRow({children:vals.map((v,i)=>cell(v,widths[i],head))});
-  const revision=new d.Table({width:{size:totalW,type:d.WidthType.DXA},columnWidths:widths,rows:[row(['Revision','Date','Revised Item','Reason for Revision'],true),row(['0',_rptDateToday(),'','For use by CNPC Brasil.']),row(['','','','']),row(['','','','']),row(['','','',''])]});
+  const revision=new d.Table({width:{size:totalW,type:d.WidthType.DXA},columnWidths:widths,rows:[row(['Revision','Date','Reason for Revision'],true),row(['0',_rptDateToday(),'For use by CNPC Brasil.']),row(['','','']),row(['','','']),row(['','',''])]});
   const para=(text,bold=false,size=22,align=d.AlignmentType.LEFT,before=0,after=0)=>new d.Paragraph({alignment:align,children:[new d.TextRun({text,bold,size,font:'Calibri'})],spacing:{before,after}});
-  return [_rptSpacer(d,240,240),logos,_rptSpacer(d,540,420),para('Monitoring and Control of RD&I Projects',true,30,d.AlignmentType.CENTER,0,180),para('MONTHLY REPORT - '+mesAno,true,36,d.AlignmentType.CENTER,0,260),...Array.from({length:4},()=>_rptBlankLine(d)),para('Revision Control',true,22,d.AlignmentType.LEFT,0,180),para('Prepared By: '+(preparedBy||'Ricardo Nazareth'),true,20,d.AlignmentType.LEFT,0,120),para('Authorised By: '+(authorisedBy||'Yiannis Chanis'),true,20,d.AlignmentType.LEFT,0,220),revision];
+  return [_rptSpacer(d,240,240),logos,_rptSpacer(d,540,420),para('Monitoring and Control of RD&I Projects',true,30,d.AlignmentType.CENTER,0,180),para('MONTHLY REPORT - '+mesAno,true,36,d.AlignmentType.CENTER,0,260),...Array.from({length:4},()=>_rptBlankLine(d)),para('Revision Control',true,22,d.AlignmentType.LEFT,0,180),para('Prepared by: Y. Chanis',true,20,d.AlignmentType.LEFT,0,220),revision];
 }
 
 // ── Per-project sections ─────────────────────────────
